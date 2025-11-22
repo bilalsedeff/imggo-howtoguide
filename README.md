@@ -97,6 +97,132 @@ Connect your image processing workflows to databases and business tools:
 - [Salesforce](./integration-guides/salesforce.md) - CRM integration
 - [Webhook Endpoints](./integration-guides/webhook-endpoints.md) - Real-time notifications
 
+## Output Format Examples
+
+Choose the format that best fits your integration needs:
+
+### Image to JSON
+
+Perfect for APIs, modern apps, and NoSQL databases. Most popular format for web applications.
+
+- [Invoice to JSON](./use-cases/invoice-processing) - Extract invoice data as JSON objects
+- [Shelf Audit to JSON](./use-cases/retail-shelf-audit) - Product detection with nested JSON arrays
+- [Damage Assessment to JSON](./use-cases/insurance-claims) - Structured damage reports
+
+**Quick Example**:
+```json
+{
+  "vendor_name": "Acme Corp",
+  "invoice_number": "INV-2024-001",
+  "total_amount": 1942.92,
+  "line_items": [...]
+}
+```
+
+### Image to CSV
+
+Ideal for spreadsheets, data analysis, and bulk imports. Great for business users.
+
+- [Shelf Products to CSV](./use-cases/retail-shelf-audit) - Export product lists for Excel analysis
+- [Receipt Batch to CSV](./use-cases/expense-management) - Monthly expense reports
+- [Inventory Count to CSV](./use-cases/inventory-management) - Stock level exports
+
+**Quick Example**:
+```csv
+Product,Brand,Price,In Stock
+Coca-Cola 2L,Coca-Cola,2.99,Yes
+Pepsi 2L,Pepsi,2.79,Yes
+```
+
+### Image to Plain Text
+
+Extract human-readable narratives from images. Perfect for reports and documentation.
+
+- [Prescription to Text](./use-cases/medical-prescription) - Readable prescription instructions
+- [Inspection Report to Text](./use-cases/quality-control) - Manufacturing inspection narratives
+- [Field Notes to Text](./use-cases/field-service) - Technician observation reports
+
+**Quick Example**:
+```text
+Prescription for John Doe
+Medication: Amoxicillin 500mg
+Dosage: Take one capsule three times daily with food
+Duration: 10 days
+Refills: None
+```
+
+### Image to XML
+
+Legacy system integration and enterprise applications. Common in healthcare and finance.
+
+- [Medical Records to XML](./use-cases/medical-records) - HL7 FHIR compliance
+- [Financial Documents to XML](./use-cases/document-classification) - XBRL format
+- [Quality Control to XML](./use-cases/quality-control) - Manufacturing standards (ISO)
+
+**Quick Example**:
+```xml
+<invoice>
+  <vendor>Acme Corp</vendor>
+  <number>INV-2024-001</number>
+  <amount>1942.92</amount>
+</invoice>
+```
+
+### Image to YAML
+
+Configuration files and human-readable structured data. Popular in DevOps.
+
+- [Construction Reports to YAML](./use-cases/construction-tracking) - Progress tracking configs
+- [Inventory Manifests to YAML](./use-cases/inventory-management) - Warehouse configurations
+- [Asset Tags to YAML](./use-cases/field-service) - Equipment metadata
+
+**Quick Example**:
+```yaml
+vendor_name: Acme Corp
+invoice_number: INV-2024-001
+total_amount: 1942.92
+line_items:
+  - description: Professional Services
+    amount: 1500.00
+```
+
+## Upload Methods
+
+### Direct Image Upload
+
+Upload images directly from your application via multipart form-data:
+
+```bash
+curl -X POST https://img-go.com/api/patterns/{pattern_id}/ingest \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@/path/to/invoice.jpg"
+```
+
+**Best for**: Mobile apps, web forms, desktop applications
+
+**Examples**:
+- [Mobile Receipt Upload](./use-cases/expense-management) - React Native camera integration
+- [Web Form Submission](./use-cases/kyc-verification) - ID card upload from browser
+- [Desktop Batch Upload](./use-cases/invoice-processing) - Folder watching automation
+
+### Image URL Processing
+
+Process images from public URLs (S3, CDN, cloud storage):
+
+```bash
+curl -X POST https://img-go.com/api/patterns/{pattern_id}/ingest \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"image_url": "https://your-cdn.com/invoice.jpg"}'
+```
+
+**Best for**: Cloud workflows, email attachments, scheduled jobs
+
+**Examples**:
+- [Email Attachment Processing](./use-cases/invoice-processing) - Gmail API → CDN → Processing
+- [Dropbox Folder Watch](./use-cases/retail-shelf-audit) - Auto-process new uploads
+- [S3 Trigger Processing](./use-cases/construction-tracking) - AWS Lambda workflows
+
 ## Architecture Pattern
 
 All use cases follow this proven architecture:
