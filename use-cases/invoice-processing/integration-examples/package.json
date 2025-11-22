@@ -1,0 +1,31 @@
+{
+  "name": "imggo-invoice-processing",
+  "version": "1.0.0",
+  "description": "Invoice processing integration examples using ImgGo API",
+  "main": "nodejs-simple.ts",
+  "scripts": {
+    "start": "ts-node nodejs-simple.ts",
+    "build": "tsc",
+    "test": "echo \"Run examples with: npm start\""
+  },
+  "keywords": [
+    "imggo",
+    "invoice",
+    "ocr",
+    "data-extraction",
+    "automation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "form-data": "^4.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/form-data": "^2.5.0",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -29,11 +29,13 @@ Traditional methods require manual photo review, subjective assessments, and dis
 ImgGo extracts structured progress data from construction photos and outputs **YAML files** that integrate directly with project management systems:
 
 **Workflow**:
-```
+
+```plaintext
 Site Camera/Drone → Cloud Storage → ImgGo API (URL) → YAML Output → Procore/BIM 360
 ```
 
 **What Gets Extracted**:
+
 - Work package completion percentages
 - Material quantities and locations
 - Equipment presence and utilization
@@ -55,6 +57,7 @@ YAML is ideal for construction progress tracking:
 - **Nested Data**: Supports complex relationships (zones → trades → tasks)
 
 **Example Output**:
+
 ```yaml
 project_id: "PRJ-2025-001"
 site_name: "Downtown Office Complex"
@@ -545,6 +548,7 @@ def update_p6_activities(yaml_data):
 ### ROI Example
 
 **200-unit residential project**:
+
 - **Cost**: $1,200/month (API usage for 50 daily photos)
 - **PM Time Saved**: 54 hours/month × $75/hour = $4,050
 - **Reduced Rework**: $8,000/month (from early issue detection)
@@ -783,4 +787,4 @@ def should_process_photo(weather_conditions):
 
 - API Documentation: [https://img-go.com/docs](https://img-go.com/docs)
 - YAML Schema Reference: [https://img-go.com/docs/output-formats#yaml](https://img-go.com/docs/output-formats#yaml)
-- Integration Help: support@img-go.com
+- Integration Help: <support@img-go.com>

@@ -20,7 +20,7 @@ Rate limits are enforced based on your subscription plan:
 
 Every API response includes rate limit information in headers:
 
-```
+```plaintext
 X-RateLimit-Limit: 5000          # Total requests allowed in period
 X-RateLimit-Remaining: 4847      # Requests remaining
 X-RateLimit-Reset: 1640995200    # Unix timestamp when limit resets
@@ -59,6 +59,7 @@ When you exceed your rate limit:
 **Status Code**: `429 Too Many Requests`
 
 **Response**:
+
 ```json
 {
   "success": false,
@@ -75,7 +76,8 @@ When you exceed your rate limit:
 ```
 
 **Headers**:
-```
+
+```plaintext
 X-RateLimit-Limit: 5000
 X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1640995200
@@ -345,6 +347,7 @@ For processing volumes exceeding standard plans:
 ### 1. Contact Sales for Custom Limits
 
 Enterprise plans offer:
+
 - Custom rate limits (1,000+ requests/minute)
 - Dedicated infrastructure
 - SLA guarantees

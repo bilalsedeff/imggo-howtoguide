@@ -43,6 +43,7 @@ All API errors follow a consistent JSON format:
 #### 401: Missing API Key
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -54,6 +55,7 @@ All API errors follow a consistent JSON format:
 ```
 
 **Solution**:
+
 ```bash
 # Include Authorization header
 curl -H "Authorization: Bearer YOUR_API_KEY" ...
@@ -62,6 +64,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 401: Invalid API Key
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -73,6 +76,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 ```
 
 **Solutions**:
+
 - Verify API key is correct
 - Check if key has been revoked in dashboard
 - Generate a new API key if needed
@@ -80,6 +84,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 403: Insufficient Permissions
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -97,6 +102,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 422: Invalid Schema
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -116,6 +122,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 400: Missing Required Field
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -133,6 +140,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 400: Invalid Image URL
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -148,6 +156,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 ```
 
 **Solutions**:
+
 - Verify URL is publicly accessible
 - Check image format (supports: JPG, PNG, PDF, WEBP)
 - Ensure no authentication required for URL
@@ -155,6 +164,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 400: Image Too Large
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -174,6 +184,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 422: Image Quality Too Low
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -195,6 +206,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 #### 429: Rate Limit Exceeded
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -211,7 +223,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" ...
 ```
 
 **Response Headers**:
-```
+
+```plaintext
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1640995200
@@ -225,6 +238,7 @@ Retry-After: 60
 #### 404: Pattern Not Found
 
 **Error**:
+
 ```json
 {
   "success": false,
@@ -236,6 +250,7 @@ Retry-After: 60
 ```
 
 **Solutions**:
+
 - Verify pattern ID is correct
 - Check pattern hasn't been deleted
 - Ensure you have access to this pattern
@@ -243,6 +258,7 @@ Retry-After: 60
 #### 404: Job Not Found
 
 **Error**:
+
 ```json
 {
   "success": false,

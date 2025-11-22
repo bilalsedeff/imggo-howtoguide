@@ -4,7 +4,7 @@ Complete reference for all ImgGo API endpoints, request/response formats, and us
 
 ## Base URL
 
-```
+```url
 https://img-go.com/api
 ```
 
@@ -14,7 +14,7 @@ All endpoints use HTTPS. HTTP requests are automatically redirected.
 
 All requests require a Bearer token in the `Authorization` header:
 
-```
+```plaintext
 Authorization: Bearer YOUR_API_KEY
 ```
 
@@ -47,17 +47,20 @@ Retrieve all patterns for your account.
 **Endpoint**: `GET /patterns`
 
 **Parameters**:
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Results per page (default: 20, max: 100)
 - `status` (optional): Filter by status (`active`, `draft`, `archived`)
 
 **Request**:
+
 ```bash
 curl -X GET "https://img-go.com/api/patterns?page=1&limit=20" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -98,6 +101,7 @@ Create a new pattern for image data extraction.
 **Endpoint**: `POST /patterns`
 
 **Request Body**:
+
 ```json
 {
   "name": "Invoice Data Extractor",
@@ -124,6 +128,7 @@ Create a new pattern for image data extraction.
 ```
 
 **Request**:
+
 ```bash
 curl -X POST https://img-go.com/api/patterns \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -142,6 +147,7 @@ curl -X POST https://img-go.com/api/patterns \
 ```
 
 **Response** (201 Created):
+
 ```json
 {
   "success": true,
@@ -163,12 +169,14 @@ Retrieve details for a specific pattern.
 **Endpoint**: `GET /patterns/{pattern_id}`
 
 **Request**:
+
 ```bash
 curl -X GET https://img-go.com/api/patterns/pat_2gYc3kZ8mN \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -203,6 +211,7 @@ Update an existing pattern's instructions or schema.
 **Endpoint**: `PATCH /patterns/{pattern_id}`
 
 **Request Body**:
+
 ```json
 {
   "instructions": "Updated instructions",
@@ -212,6 +221,7 @@ Update an existing pattern's instructions or schema.
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -229,12 +239,14 @@ Delete a pattern. Warning: This breaks all integrations using this pattern.
 **Endpoint**: `DELETE /patterns/{pattern_id}`
 
 **Request**:
+
 ```bash
 curl -X DELETE https://img-go.com/api/patterns/pat_2gYc3kZ8mN \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -286,6 +298,7 @@ curl -X POST https://img-go.com/api/patterns/pat_2gYc3kZ8mN/ingest \
 ```
 
 **Request Parameters**:
+
 - `image_url` (string): Public URL to image (supports JPG, PNG, PDF, WEBP)
 - `image_base64` (string): Base64-encoded image data
 - `file` (file): Multipart file upload
@@ -293,6 +306,7 @@ curl -X POST https://img-go.com/api/patterns/pat_2gYc3kZ8mN/ingest \
 - `priority` (string, optional): `normal` or `high` (high priority costs 2x)
 
 **Response** (202 Accepted):
+
 ```json
 {
   "success": true,
@@ -307,6 +321,7 @@ curl -X POST https://img-go.com/api/patterns/pat_2gYc3kZ8mN/ingest \
 ```
 
 **Response** (200 OK - Synchronous, for simple patterns):
+
 ```json
 {
   "success": true,
@@ -336,12 +351,14 @@ Retrieve the status and result of a processing job.
 **Endpoint**: `GET /jobs/{job_id}`
 
 **Request**:
+
 ```bash
 curl -X GET https://img-go.com/api/jobs/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 **Response** (Job Queued):
+
 ```json
 {
   "success": true,
@@ -355,6 +372,7 @@ curl -X GET https://img-go.com/api/jobs/550e8400-e29b-41d4-a716-446655440000 \
 ```
 
 **Response** (Job Processing):
+
 ```json
 {
   "success": true,
@@ -370,6 +388,7 @@ curl -X GET https://img-go.com/api/jobs/550e8400-e29b-41d4-a716-446655440000 \
 ```
 
 **Response** (Job Completed):
+
 ```json
 {
   "success": true,
@@ -392,6 +411,7 @@ curl -X GET https://img-go.com/api/jobs/550e8400-e29b-41d4-a716-446655440000 \
 ```
 
 **Response** (Job Failed):
+
 ```json
 {
   "success": false,
@@ -416,18 +436,21 @@ List recent processing jobs.
 **Endpoint**: `GET /jobs`
 
 **Parameters**:
+
 - `page` (optional): Page number
 - `limit` (optional): Results per page (max: 100)
 - `status` (optional): Filter by status (`queued`, `processing`, `completed`, `failed`)
 - `pattern_id` (optional): Filter by pattern
 
 **Request**:
+
 ```bash
 curl -X GET "https://img-go.com/api/jobs?status=completed&limit=10" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -461,6 +484,7 @@ Retrieve all configured webhooks.
 **Endpoint**: `GET /webhooks`
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -485,6 +509,7 @@ Configure a webhook endpoint to receive real-time job notifications.
 **Endpoint**: `POST /webhooks`
 
 **Request Body**:
+
 ```json
 {
   "url": "https://your-app.com/webhooks/imggo",
@@ -494,6 +519,7 @@ Configure a webhook endpoint to receive real-time job notifications.
 ```
 
 **Response** (201 Created):
+
 ```json
 {
   "success": true,
@@ -514,6 +540,7 @@ Remove a webhook configuration.
 **Endpoint**: `DELETE /webhooks/{webhook_id}`
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -527,7 +554,7 @@ Remove a webhook configuration.
 
 All API responses include standard headers:
 
-```
+```plaintext
 Content-Type: application/json
 X-Request-ID: req_abc123xyz
 X-RateLimit-Limit: 1000

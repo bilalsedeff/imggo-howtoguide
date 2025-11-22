@@ -1,0 +1,109 @@
+{
+  "name": "Invoice Processing: Email → ImgGo → QuickBooks",
+  "description": "Automatically extract invoice data from email attachments and create QuickBooks bills",
+  "trigger": {
+    "app": "gmail",
+    "event": "new_email",
+    "config": {
+      "label": "invoices",
+      "has_attachment": true,
+      "search_query": "subject:invoice OR subject:bill"
+    }
+  },
+  "steps": [
+    {
+      "id": 1,
+      "app": "filter",
+      "action": "only_continue_if",
+      "config": {
+        "conditions": [
+          {
+            "field": "{{trigger.attachments.length}}",
+            "operator": "greater_than",
+            "value": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "app": "webhooks",
+      "action": "post",
+      "config": {
+        "url": "https://img-go.com/api/patterns/{{env.IMGGO_PATTERN_ID}}/ingest",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {{env.IMGGO_API_KEY}}",
+          "Idempotency-Key": "{{trigger.id}}"
+        },
+        "body": {
+          "image_url": "{{trigger.attachments[0].url}}"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "app": "delay",
+      "action": "for",
+      "config": {
+        "time_amount": 30,
+        "time_unit": "seconds"
+      }
+    },
+    {
+      "id": 4,
+      "app": "webhooks",
+      "action": "get",
+      "config": {
+        "url": "https://img-go.com/api/jobs/{{step_2.data.job_id}}",
+        "headers": {
+          "Authorization": "Bearer {{env.IMGGO_API_KEY}}"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "app": "code",
+      "action": "run_javascript",
+      "config": {
+        "code": "const result = JSON.parse(inputData.step_4_response);\nconst invoice = result.data.result;\n\n// Validate invoice data\nif (!invoice.vendor || !invoice.invoice_number || !invoice.total_amount) {\n  throw new Error('Missing required invoice fields');\n}\n\noutput = {\n  vendor_name: invoice.vendor.name,\n  invoice_number: invoice.invoice_number,\n  invoice_date: invoice.invoice_date,\n  due_date: invoice.due_date,\n  total_amount: invoice.total_amount,\n  line_items: invoice.line_items || []\n};"
+      }
+    },
+    {
+      "id": 6,
+      "app": "quickbooks",
+      "action": "create_bill",
+      "config": {
+        "vendor": "{{step_5.vendor_name}}",
+        "doc_number": "{{step_5.invoice_number}}",
+        "txn_date": "{{step_5.invoice_date}}",
+        "due_date": "{{step_5.due_date}}",
+        "total_amt": "{{step_5.total_amount}}",
+        "line_items": "{{step_5.line_items}}"
+      }
+    },
+    {
+      "id": 7,
+      "app": "gmail",
+      "action": "send_email",
+      "config": {
+        "to": "accounting@company.com",
+        "subject": "Invoice Processed: {{step_5.invoice_number}}",
+        "body": "Invoice {{step_5.invoice_number}} from {{step_5.vendor_name}} has been automatically processed and added to QuickBooks.\n\nAmount: ${{step_5.total_amount}}\nDue Date: {{step_5.due_date}}\n\nQuickBooks Bill ID: {{step_6.id}}"
+      }
+    }
+  ],
+  "error_handling": {
+    "on_error": "send_error_email",
+    "error_email_to": "admin@company.com"
+  },
+  "notes": [
+    "Set environment variables:",
+    "- IMGGO_API_KEY: Your ImgGo API key",
+    "- IMGGO_PATTERN_ID: Your invoice pattern ID",
+    "",
+    "Create pattern at img-go.com/patterns with:",
+    "- Output format: JSON",
+    "- Instructions: 'Extract vendor name, invoice number, date, due date, line items, and total amount from invoice'"
+  ]
+}

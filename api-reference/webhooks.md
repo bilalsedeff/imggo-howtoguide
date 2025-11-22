@@ -15,7 +15,7 @@ Webhooks enable your application to receive instant notifications when jobs comp
 
 ## How Webhooks Work
 
-```
+```plaintext
 1. Configure webhook URL in pattern settings
 2. Submit image processing job
 3. Job processes asynchronously
@@ -249,7 +249,7 @@ def verify_webhook(payload, signature, secret):
 
 Configure webhook URLs with HTTPS to encrypt data in transit:
 
-```
+```plaintext
 ✅ https://your-app.com/webhooks/imggo
 ❌ http://your-app.com/webhooks/imggo
 ```
@@ -509,6 +509,7 @@ def handle_job_completed(data):
 ### Webhook Not Received
 
 1. **Check webhook URL is accessible**:
+
 ```bash
 curl -X POST https://your-app.com/webhooks/imggo
 ```
@@ -516,6 +517,7 @@ curl -X POST https://your-app.com/webhooks/imggo
 2. **Verify firewall allows incoming connections**
 
 3. **Check webhook is registered**:
+
 ```bash
 curl -X GET https://img-go.com/api/webhooks \
   -H "Authorization: Bearer YOUR_API_KEY"
