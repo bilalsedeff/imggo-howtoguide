@@ -595,5 +595,6 @@ Complete code examples in `integration-examples/`:
 **SEO Keywords**: receipt to CSV, expense management automation, image to CSV conversion, receipt OCR to spreadsheet, batch receipt processing
 
 **Sources**:
+
 - [Expense Report Statistics](https://www.certify.com/)
 - [OCR for Business](https://www.klippa.com/)
