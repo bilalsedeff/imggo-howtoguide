@@ -1,0 +1,291 @@
+{
+  "name": "Invoice Processing - Email to PostgreSQL",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "labelIds": ["invoices"],
+          "includeSubject": "invoice"
+        }
+      },
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"attachments\"].length}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Has Attachments",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{$env.IMGGO_PATTERN_ID}}/ingest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "={{$json[\"id\"]}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "image_url",
+              "value": "={{$json[\"attachments\"][0][\"url\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Process with ImgGo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "name": "Wait for Processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "webhookId": "{{$json[\"data\"][\"job_id\"]}}"
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/jobs/{{$node[\"Process with ImgGo\"].json[\"data\"][\"job_id\"]}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Get Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "invoices",
+        "columns": "vendor_name, invoice_number, invoice_date, total_amount, raw_json",
+        "additionalFields": {
+          "returnFields": "*"
+        }
+      },
+      "name": "Insert Invoice",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1250, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "PostgreSQL"
+        }
+      },
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "continueOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate invoice data\nconst result = $input.first().json.data.result;\n\nconst errors = [];\n\nif (!result.vendor?.name) {\n  errors.push('Missing vendor name');\n}\n\nif (!result.invoice_number) {\n  errors.push('Missing invoice number');\n}\n\nif (!result.total_amount) {\n  errors.push('Missing total amount');\n}\n\n// Check total matches subtotal + tax\nconst calculatedTotal = (result.subtotal || 0) + (result.tax_total || 0);\nif (Math.abs(calculatedTotal - result.total_amount) > 0.01) {\n  errors.push(`Total mismatch: ${calculatedTotal} vs ${result.total_amount}`);\n}\n\nreturn {\n  json: {\n    valid: errors.length === 0,\n    errors: errors,\n    data: result\n  }\n};"
+      },
+      "name": "Validate Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json[\"valid\"]}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Is Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 500]
+    },
+    {
+      "parameters": {
+        "channel": "#invoices",
+        "text": "=New invoice processed:\nVendor: {{$json[\"data\"][\"vendor\"][\"name\"]}}\nInvoice #: {{$json[\"data\"][\"invoice_number\"]}}\nAmount: ${{$json[\"data\"][\"total_amount\"]}}",
+        "otherOptions": {}
+      },
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1450, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "3",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#invoice-errors",
+        "text": "=Invoice validation failed:\nErrors: {{$json[\"errors\"].join(\", \")}}",
+        "otherOptions": {}
+      },
+      "name": "Alert Errors",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1450, 700],
+      "credentials": {
+        "slackApi": {
+          "id": "3",
+          "name": "Slack API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Has Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Attachments": {
+      "main": [
+        [
+          {
+            "node": "Process with ImgGo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process with ImgGo": {
+      "main": [
+        [
+          {
+            "node": "Wait for Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Processing": {
+      "main": [
+        [
+          {
+            "node": "Get Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Results": {
+      "main": [
+        [
+          {
+            "node": "Validate Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Data": {
+      "main": [
+        [
+          {
+            "node": "Is Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid": {
+      "main": [
+        [
+          {
+            "node": "Insert Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alert Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Invoice": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": ["invoice", "automation", "imggo"],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-22T00:00:00.000Z",
+  "versionId": "1"
+}
