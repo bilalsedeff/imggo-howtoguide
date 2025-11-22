@@ -28,7 +28,7 @@ Send extracted image data directly to Google Sheets for easy viewing, collaborat
 3. Name it (e.g., "Invoice Data")
 4. Create headers:
 
-```
+```plaintext
 | Invoice Number | Vendor | Date | Amount | Status | Processed At |
 ```
 
@@ -36,7 +36,7 @@ Send extracted image data directly to Google Sheets for easy viewing, collaborat
 
 From your Google Sheet URL:
 
-```
+```plaintext
 https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
                                      ↑                                        ↑
                                      Sheet ID starts here          ends here
@@ -54,7 +54,7 @@ Copy the Sheet ID: `1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms`
    - Download JSON key file
 5. Share your Google Sheet with the service account email (found in JSON):
 
-   ```
+   ```plaintext
    my-service-account@project-id.iam.gserviceaccount.com
    ```
 
