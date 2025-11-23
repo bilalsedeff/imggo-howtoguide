@@ -110,6 +110,7 @@ Perfect for APIs, modern apps, and NoSQL databases. Most popular format for web 
 - [Damage Assessment to JSON](./use-cases/insurance-claims) - Structured damage reports
 
 **Quick Example**:
+
 ```json
 {
   "vendor_name": "Acme Corp",
@@ -128,6 +129,7 @@ Ideal for spreadsheets, data analysis, and bulk imports. Great for business user
 - [Inventory Count to CSV](./use-cases/inventory-management) - Stock level exports
 
 **Quick Example**:
+
 ```csv
 Product,Brand,Price,In Stock
 Coca-Cola 2L,Coca-Cola,2.99,Yes
@@ -143,6 +145,7 @@ Extract human-readable narratives from images. Perfect for reports and documenta
 - [Field Notes to Text](./use-cases/field-service) - Technician observation reports
 
 **Quick Example**:
+
 ```text
 Prescription for John Doe
 Medication: Amoxicillin 500mg
@@ -160,6 +163,7 @@ Legacy system integration and enterprise applications. Common in healthcare and 
 - [Quality Control to XML](./use-cases/quality-control) - Manufacturing standards (ISO)
 
 **Quick Example**:
+
 ```xml
 <invoice>
   <vendor>Acme Corp</vendor>
@@ -177,6 +181,7 @@ Configuration files and human-readable structured data. Popular in DevOps.
 - [Asset Tags to YAML](./use-cases/field-service) - Equipment metadata
 
 **Quick Example**:
+
 ```yaml
 vendor_name: Acme Corp
 invoice_number: INV-2024-001
@@ -201,6 +206,7 @@ curl -X POST https://img-go.com/api/patterns/{pattern_id}/ingest \
 **Best for**: Mobile apps, web forms, desktop applications
 
 **Examples**:
+
 - [Mobile Receipt Upload](./use-cases/expense-management) - React Native camera integration
 - [Web Form Submission](./use-cases/kyc-verification) - ID card upload from browser
 - [Desktop Batch Upload](./use-cases/invoice-processing) - Folder watching automation
@@ -219,6 +225,7 @@ curl -X POST https://img-go.com/api/patterns/{pattern_id}/ingest \
 **Best for**: Cloud workflows, email attachments, scheduled jobs
 
 **Examples**:
+
 - [Email Attachment Processing](./use-cases/invoice-processing) - Gmail API → CDN → Processing
 - [Dropbox Folder Watch](./use-cases/retail-shelf-audit) - Auto-process new uploads
 - [S3 Trigger Processing](./use-cases/construction-tracking) - AWS Lambda workflows
