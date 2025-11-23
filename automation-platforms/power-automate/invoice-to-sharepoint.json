@@ -1,0 +1,276 @@
+{
+  "name": "Invoice Processing: Email → ImgGo → SharePoint",
+  "description": "Process invoice attachments from Outlook and save to SharePoint with extracted data",
+  "properties": {
+    "connectionReferences": {
+      "shared_office365": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "shared_office365"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      },
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "shared_sharepointonline"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "IMGGO_API_KEY": {
+          "defaultValue": "",
+          "type": "SecureString"
+        },
+        "IMGGO_PATTERN_ID": {
+          "defaultValue": "pat_invoice_json",
+          "type": "String"
+        }
+      },
+      "triggers": {
+        "When_a_new_email_arrives": {
+          "splitOn": "@triggerBody()?['value']",
+          "type": "ApiConnectionNotification",
+          "inputs": {
+            "host": {
+              "connection": {
+                "name": "@parameters('$connections')['office365']['connectionId']"
+              }
+            },
+            "fetch": {
+              "method": "get",
+              "pathTemplate": {
+                "template": "/v2/Mail/OnNewEmail"
+              },
+              "queries": {
+                "folderPath": "Inbox",
+                "importance": "Any",
+                "fetchOnlyWithAttachment": true,
+                "includeAttachments": true,
+                "subjectFilter": "invoice"
+              }
+            }
+          }
+        }
+      },
+      "actions": {
+        "Condition_-_Has_Attachments": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "greater": [
+                  "@length(triggerBody()?['attachments'])",
+                  0
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "HTTP_-_Upload_to_ImgGo": {
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "https://img-go.com/api/patterns/@{parameters('IMGGO_PATTERN_ID')}/ingest",
+                "headers": {
+                  "Authorization": "Bearer @{parameters('IMGGO_API_KEY')}",
+                  "Idempotency-Key": "@{triggerBody()?['id']}-@{utcNow()}",
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "image_url": "@{first(triggerBody()?['attachments'])?['contentBytes']}"
+                }
+              },
+              "runAfter": {}
+            },
+            "Delay": {
+              "type": "Wait",
+              "inputs": {
+                "interval": {
+                  "count": 30,
+                  "unit": "Second"
+                }
+              },
+              "runAfter": {
+                "HTTP_-_Upload_to_ImgGo": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "HTTP_-_Get_Result": {
+              "type": "Http",
+              "inputs": {
+                "method": "GET",
+                "uri": "https://img-go.com/api/jobs/@{body('HTTP_-_Upload_to_ImgGo')?['data']?['job_id']}",
+                "headers": {
+                  "Authorization": "Bearer @{parameters('IMGGO_API_KEY')}"
+                }
+              },
+              "runAfter": {
+                "Delay": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Parse_JSON": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('HTTP_-_Get_Result')?['data']?['result']",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invoice_number": {
+                      "type": "string"
+                    },
+                    "vendor": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "address": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "invoice_date": {
+                      "type": "string"
+                    },
+                    "due_date": {
+                      "type": "string"
+                    },
+                    "total_amount": {
+                      "type": "number"
+                    },
+                    "line_items": {
+                      "type": "array"
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "HTTP_-_Get_Result": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Create_file_in_SharePoint": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "body": "@first(triggerBody()?['attachments'])?['contentBytes']",
+                "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://yourtenant.sharepoint.com/sites/YourSite'))}/files",
+                "queries": {
+                  "folderPath": "/Invoices",
+                  "name": "@{body('Parse_JSON')?['invoice_number']}.pdf"
+                }
+              },
+              "runAfter": {
+                "Parse_JSON": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Create_item_in_SharePoint_List": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "body": {
+                  "Title": "@{body('Parse_JSON')?['invoice_number']}",
+                  "VendorName": "@{body('Parse_JSON')?['vendor']?['name']}",
+                  "InvoiceDate": "@{body('Parse_JSON')?['invoice_date']}",
+                  "DueDate": "@{body('Parse_JSON')?['due_date']}",
+                  "TotalAmount": "@{body('Parse_JSON')?['total_amount']}",
+                  "Status": "Pending Review",
+                  "FileLink": "@{body('Create_file_in_SharePoint')?['Path']}"
+                },
+                "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://yourtenant.sharepoint.com/sites/YourSite'))}/tables/@{encodeURIComponent(encodeURIComponent('Invoices'))}/items"
+              },
+              "runAfter": {
+                "Create_file_in_SharePoint": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Send_approval_email": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['office365']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "body": {
+                  "NotificationUrl": "@{listCallbackUrl()}",
+                  "Message": {
+                    "To": "approver@company.com",
+                    "Subject": "Invoice Approval Required: @{body('Parse_JSON')?['invoice_number']}",
+                    "Body": "<p>A new invoice has been processed and requires your approval.</p><p><strong>Invoice Number:</strong> @{body('Parse_JSON')?['invoice_number']}<br><strong>Vendor:</strong> @{body('Parse_JSON')?['vendor']?['name']}<br><strong>Amount:</strong> $@{body('Parse_JSON')?['total_amount']}<br><strong>Due Date:</strong> @{body('Parse_JSON')?['due_date']}</p><p><a href='@{body('Create_file_in_SharePoint')?['WebUrl']}'>View Invoice in SharePoint</a></p>",
+                    "Importance": "Normal"
+                  }
+                },
+                "path": "/approvalmail/$subscriptions"
+              },
+              "runAfter": {
+                "Create_item_in_SharePoint_List": [
+                  "Succeeded"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "outputs": {}
+    }
+  },
+  "schemaVersion": "1.0.0.0",
+  "notes": [
+    "Power Automate Flow for Invoice Processing with ImgGo",
+    "",
+    "Setup Instructions:",
+    "1. Import this JSON into Power Automate",
+    "2. Configure Office 365 Outlook connection",
+    "3. Configure SharePoint Online connection",
+    "4. Set flow parameters:",
+    "   - IMGGO_API_KEY: Your ImgGo API key (secure string)",
+    "   - IMGGO_PATTERN_ID: Your invoice pattern ID",
+    "",
+    "SharePoint List Columns:",
+    "Create a SharePoint list named 'Invoices' with these columns:",
+    "- Title (Single line of text) - Invoice Number",
+    "- VendorName (Single line of text)",
+    "- InvoiceDate (Date)",
+    "- DueDate (Date)",
+    "- TotalAmount (Number)",
+    "- Status (Choice: Pending Review, Approved, Rejected)",
+    "- FileLink (Hyperlink)",
+    "",
+    "Pattern Configuration:",
+    "Create pattern at img-go.com/patterns:",
+    "- Output format: JSON",
+    "- Instructions: Extract vendor name, invoice number, date, due date, line items, and total amount"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "imggo-yaml-examples",
+  "version": "1.0.0",
+  "description": "ImgGo API YAML output format examples",
+  "main": "nodejs-example.ts",
+  "scripts": {
+    "start": "ts-node nodejs-example.ts",
+    "example": "ts-node nodejs-example.ts"
+  },
+  "keywords": [
+    "imggo",
+    "yaml",
+    "construction",
+    "kubernetes",
+    "devops"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "form-data": "^4.0.0",
+    "dotenv": "^16.3.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/form-data": "^2.5.0",
+    "@types/js-yaml": "^4.0.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0"
+  }
+}

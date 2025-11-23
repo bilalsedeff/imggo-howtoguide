@@ -1,0 +1,161 @@
+{
+  "name": "Invoice Processing: Email → ImgGo → Database",
+  "description": "Automatically extract invoice data and save to database using Make",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gmail:watchEmails",
+      "version": 1,
+      "parameters": {
+        "folder": "INBOX",
+        "criteria": {
+          "subject": "invoice",
+          "hasAttachment": true
+        }
+      },
+      "mapper": {}
+    },
+    {
+      "id": 2,
+      "module": "http:makeArequest",
+      "version": 3,
+      "parameters": {
+        "url": "https://img-go.com/api/patterns/{{1.IMGGO_PATTERN_ID}}/ingest",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{1.IMGGO_API_KEY}}"
+          },
+          {
+            "name": "Idempotency-Key",
+            "value": "{{1.email_id}}-{{1.timestamp}}"
+          }
+        ],
+        "bodyType": "application/json",
+        "body": "{\n  \"image_url\": \"{{1.attachments[].url}}\"\n}"
+      },
+      "mapper": {
+        "email_id": "{{1.id}}",
+        "timestamp": "{{now}}",
+        "IMGGO_API_KEY": "{{1.IMGGO_API_KEY}}",
+        "IMGGO_PATTERN_ID": "{{1.IMGGO_PATTERN_ID}}"
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:sleep",
+      "version": 1,
+      "parameters": {
+        "delay": 30
+      },
+      "mapper": {}
+    },
+    {
+      "id": 4,
+      "module": "http:makeArequest",
+      "version": 3,
+      "parameters": {
+        "url": "https://img-go.com/api/jobs/{{2.data.job_id}}",
+        "method": "GET",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{1.IMGGO_API_KEY}}"
+          }
+        ]
+      },
+      "mapper": {
+        "job_id": "{{2.data.job_id}}"
+      }
+    },
+    {
+      "id": 5,
+      "module": "util:setVariable",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "invoice_number": "{{parseJSON(4.data.result).invoice_number}}",
+        "vendor_name": "{{parseJSON(4.data.result).vendor.name}}",
+        "total_amount": "{{parseJSON(4.data.result).total_amount}}",
+        "invoice_date": "{{parseJSON(4.data.result).invoice_date}}",
+        "due_date": "{{parseJSON(4.data.result).due_date}}"
+      }
+    },
+    {
+      "id": 6,
+      "module": "postgresql:insertRow",
+      "version": 1,
+      "parameters": {
+        "connection": "{{1.DB_CONNECTION}}",
+        "table": "invoices",
+        "columns": [
+          "invoice_number",
+          "vendor_name",
+          "total_amount",
+          "invoice_date",
+          "due_date",
+          "email_id",
+          "processed_at"
+        ]
+      },
+      "mapper": {
+        "invoice_number": "{{5.invoice_number}}",
+        "vendor_name": "{{5.vendor_name}}",
+        "total_amount": "{{5.total_amount}}",
+        "invoice_date": "{{5.invoice_date}}",
+        "due_date": "{{5.due_date}}",
+        "email_id": "{{1.id}}",
+        "processed_at": "{{now}}"
+      }
+    },
+    {
+      "id": 7,
+      "module": "gmail:sendAnEmail",
+      "version": 1,
+      "parameters": {
+        "to": "accounting@company.com",
+        "subject": "Invoice Processed: {{5.invoice_number}}",
+        "bodyType": "text",
+        "body": "Invoice {{5.invoice_number}} from {{5.vendor_name}} has been processed.\n\nAmount: ${{5.total_amount}}\nDue Date: {{5.due_date}}\n\nThe invoice has been added to the database."
+      },
+      "mapper": {}
+    }
+  ],
+  "metadata": {
+    "designer": {
+      "orphans": []
+    },
+    "version": 1,
+    "newVariables": true
+  },
+  "notes": [
+    "Make (Integromat) Workflow for Invoice Processing",
+    "",
+    "Setup Instructions:",
+    "1. Import this JSON blueprint into Make",
+    "2. Configure Gmail connection",
+    "3. Configure PostgreSQL connection",
+    "4. Set data store variables:",
+    "   - IMGGO_API_KEY: Your ImgGo API key",
+    "   - IMGGO_PATTERN_ID: Your invoice pattern ID",
+    "   - DB_CONNECTION: PostgreSQL connection",
+    "",
+    "Pattern Configuration:",
+    "Create pattern at img-go.com/patterns:",
+    "- Output format: JSON",
+    "- Instructions: Extract vendor, invoice number, date, due date, line items, and total amount",
+    "",
+    "Database Schema:",
+    "CREATE TABLE invoices (",
+    "    id SERIAL PRIMARY KEY,",
+    "    invoice_number VARCHAR(100) UNIQUE NOT NULL,",
+    "    vendor_name VARCHAR(255) NOT NULL,",
+    "    total_amount DECIMAL(10, 2),",
+    "    invoice_date DATE,",
+    "    due_date DATE,",
+    "    email_id VARCHAR(255),",
+    "    processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+    ");"
+  ]
+}
