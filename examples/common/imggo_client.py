@@ -69,8 +69,9 @@ class ImgGoClient:
             idempotency_key = f"{Path(image_path).stem}-{int(time.time())}"
 
         # Upload image
+        filename = Path(image_path).name
         with open(image_path, 'rb') as f:
-            files = {'file': f}
+            files = {'image': (filename, f, 'image/jpeg')}
             data = {}
 
             if webhook_url:
@@ -179,8 +180,9 @@ class ImgGoClient:
             if progress_callback:
                 progress_callback(status, attempt + 1)
 
-            if status == "completed":
-                return job_status["result"]
+            if status in ("completed", "succeeded"):
+                # API returns result in "manifest" field for succeeded jobs
+                return job_status.get("manifest") or job_status.get("result")
 
             elif status == "failed":
                 error = job_status.get("error", "Unknown error")
