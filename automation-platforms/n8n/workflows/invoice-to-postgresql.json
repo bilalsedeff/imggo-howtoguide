@@ -1,0 +1,311 @@
+{
+  "name": "Invoice Email to PostgreSQL",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": ["INBOX"],
+          "includeSpamTrash": false,
+          "receivedAfter": "={{ $now.minus(1, 'hour').toISO() }}"
+        },
+        "options": {}
+      },
+      "id": "1b7d8e6a-4b2c-4f8d-9e3a-1c5d6e7f8g9h",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [],
+          "number": [
+            {
+              "value1": "={{ $json.attachments.length }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "2c8e9f7b-5c3d-4g9e-0f4b-2d6e7f8g9h0i",
+      "name": "Filter: Has Attachments",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{ $env.IMGGO_PATTERN_ID }}/ingest",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.attachments[0].url }}\"\n}",
+        "options": {}
+      },
+      "id": "3d9f0g8c-6d4e-4h0f-1g5c-3e7f8g9h0i1j",
+      "name": "HTTP Request: Upload to ImgGo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "id": "4e0g1h9d-7e5f-4i1g-2h6d-4f8g9h0i1j2k",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "webhookId": "{{ $json.webhookId }}"
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/jobs/{{ $node['HTTP Request: Upload to ImgGo'].json['data']['job_id'] }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "5f1h2i0e-8f6g-4j2h-3i7e-5g9h0i1j2k3l",
+      "name": "HTTP Request: Get Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse ImgGo result\nconst response = $input.item.json;\n\nif (response.data.status !== 'completed') {\n  throw new Error(`Job not completed: ${response.data.status}`);\n}\n\nconst result = response.data.result;\n\n// Validate required fields\nif (!result.vendor || !result.invoice_number || !result.total_amount) {\n  throw new Error('Missing required invoice fields');\n}\n\n// Transform data for database\nreturn {\n  invoice_number: result.invoice_number,\n  vendor_name: result.vendor.name || result.vendor,\n  vendor_address: result.vendor.address || null,\n  invoice_date: result.invoice_date,\n  due_date: result.due_date,\n  subtotal: parseFloat(result.subtotal || 0),\n  tax_amount: parseFloat(result.tax_amount || 0),\n  total_amount: parseFloat(result.total_amount),\n  currency: result.currency || 'USD',\n  status: 'pending',\n  raw_data: JSON.stringify(result),\n  email_id: $node['Gmail Trigger'].json['id'],\n  processed_at: new Date().toISOString()\n};"
+      },
+      "id": "6g2i3j1f-9g7h-4k3i-4j8f-6h0i1j2k3l4m",
+      "name": "Code: Parse and Validate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "invoices",
+        "columns": "invoice_number, vendor_name, vendor_address, invoice_date, due_date, subtotal, tax_amount, total_amount, currency, status, raw_data, email_id, processed_at",
+        "additionalFields": {
+          "mode": "defineBelow",
+          "options": {}
+        }
+      },
+      "id": "7h3j4k2g-0h8i-4l4j-5k9g-7i1j2k3l4m5n",
+      "name": "PostgreSQL: Insert Invoice",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "PostgreSQL Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.NOTIFICATION_EMAIL }}",
+        "subject": "=Invoice Processed: {{ $node['Code: Parse and Validate'].json['invoice_number'] }}",
+        "emailType": "text",
+        "message": "=Invoice {{ $node['Code: Parse and Validate'].json['invoice_number'] }} from {{ $node['Code: Parse and Validate'].json['vendor_name'] }} has been automatically processed and added to the database.\n\nDetails:\n- Invoice Number: {{ $node['Code: Parse and Validate'].json['invoice_number'] }}\n- Vendor: {{ $node['Code: Parse and Validate'].json['vendor_name'] }}\n- Amount: ${{ $node['Code: Parse and Validate'].json['total_amount'] }}\n- Due Date: {{ $node['Code: Parse and Validate'].json['due_date'] }}\n- Status: Pending Review\n\nPlease review in the accounting system.",
+        "options": {}
+      },
+      "id": "8i4k5l3h-1i9j-4m5k-6l0h-8j2k3l4m5n6o",
+      "name": "Send Notification Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1650, 300],
+      "credentials": {
+        "smtp": {
+          "id": "3",
+          "name": "SMTP Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.error }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "9j5l6m4i-2j0k-4n6l-7m1i-9k3l4m5n6o7p",
+      "name": "On Error",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 500]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "=Error Processing Invoice",
+        "emailType": "text",
+        "message": "=An error occurred while processing an invoice from email {{ $node['Gmail Trigger'].json['from'] }}.\n\nError Details:\n{{ $json.error }}\n\nEmail ID: {{ $node['Gmail Trigger'].json['id'] }}\nTimestamp: {{ $now.toISO() }}\n\nPlease review manually.",
+        "options": {}
+      },
+      "id": "0k6m7n5j-3k1l-4o7m-8n2j-0l4m5n6o7p8q",
+      "name": "Send Error Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1450, 500],
+      "credentials": {
+        "smtp": {
+          "id": "3",
+          "name": "SMTP Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter: Has Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Has Attachments": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Upload to ImgGo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Upload to ImgGo": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Get Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Get Result": {
+      "main": [
+        [
+          {
+            "node": "Code: Parse and Validate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "On Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parse and Validate": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Insert Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL: Insert Invoice": {
+      "main": [
+        [
+          {
+            "node": "Send Notification Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error": {
+      "main": [
+        [
+          {
+            "node": "Send Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "1",
+      "name": "Invoice Processing"
+    },
+    {
+      "id": "2",
+      "name": "ImgGo"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-22T14:30:00.000Z",
+  "versionId": "1"
+}

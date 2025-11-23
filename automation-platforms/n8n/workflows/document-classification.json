@@ -1,0 +1,446 @@
+{
+  "name": "Document Classification and Routing",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "document-upload",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "document-upload-webhook"
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{ $env.IMGGO_CLASSIFICATION_PATTERN }}/ingest",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "={{ $json.upload_id }}-{{ $now.toUnixInteger() }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.document_url }}\"\n}",
+        "options": {}
+      },
+      "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+      "name": "HTTP Request: Classify Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 25,
+        "unit": "seconds"
+      },
+      "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+      "name": "Wait for Classification",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/jobs/{{ $node['HTTP Request: Classify Document'].json['data']['job_id'] }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
+      "name": "HTTP Request: Get Classification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse classification result\nconst response = $input.item.json;\n\nif (response.data.status !== 'completed') {\n  throw new Error(`Classification not completed: ${response.data.status}`);\n}\n\nconst result = response.data.result;\nconst documentType = result.document_type?.toLowerCase() || 'unknown';\nconst confidence = parseFloat(result.confidence || 0);\n\n// Return classification with routing info\nreturn {\n  document_type: documentType,\n  confidence: confidence,\n  metadata: result.metadata || {},\n  original_url: $node['Webhook'].json['document_url'],\n  upload_id: $node['Webhook'].json['upload_id'],\n  requires_review: confidence < 0.85,\n  raw_result: result\n};"
+      },
+      "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+      "name": "Code: Parse Classification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "rules": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.document_type }}",
+                    "value2": "invoice"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "invoice"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.document_type }}",
+                    "value2": "receipt"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "receipt"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.document_type }}",
+                    "value2": "contract"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "contract"
+            },
+            {
+              "conditions": {
+                "boolean": [
+                  {
+                    "value1": "={{ $json.requires_review }}",
+                    "value2": true
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "manual_review"
+            }
+          ]
+        },
+        "fallbackOutput": "extra",
+        "options": {}
+      },
+      "id": "6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u",
+      "name": "Switch: Route by Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{ $env.IMGGO_INVOICE_PATTERN }}/ingest",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "=invoice-{{ $json.upload_id }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.original_url }}\"\n}",
+        "options": {}
+      },
+      "id": "7g8h9i0j-1k2l-3m4n-5o6p-7q8r9s0t1u2v",
+      "name": "Process Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 150],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{ $env.IMGGO_RECEIPT_PATTERN }}/ingest",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "=receipt-{{ $json.upload_id }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.original_url }}\"\n}",
+        "options": {}
+      },
+      "id": "8h9i0j1k-2l3m-4n5o-6p7q-8r9s0t1u2v3w",
+      "name": "Process Receipt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "contracts",
+        "columns": "document_url, upload_id, classified_at, status",
+        "additionalFields": {}
+      },
+      "id": "9i0j1k2l-3m4n-5o6p-7q8r-9s0t1u2v3w4x",
+      "name": "Save Contract to Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1450, 450],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "PostgreSQL Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "manual_review_queue",
+        "columns": "document_url, upload_id, document_type, confidence, reason, created_at",
+        "additionalFields": {}
+      },
+      "id": "0j1k2l3m-4n5o-6p7q-8r9s-0t1u2v3w4x5y",
+      "name": "Add to Review Queue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1450, 600],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "PostgreSQL Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "={{ $env.SLACK_CHANNEL }}",
+        "text": "=:mag: New document requires manual review\n\n*Type*: {{ $json.document_type }}\n*Confidence*: {{ $json.confidence }}%\n*Upload ID*: {{ $json.upload_id }}\n\n<{{ $env.REVIEW_APP_URL }}/review/{{ $json.upload_id }}|Review Now>",
+        "otherOptions": {}
+      },
+      "id": "1k2l3m4n-5o6p-7q8r-9s0t-1u2v3w4x5y6z",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1650, 600],
+      "credentials": {
+        "slackApi": {
+          "id": "4",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"upload_id\": \"{{ $node['Webhook'].json['upload_id'] }}\",\n  \"document_type\": \"{{ $node['Code: Parse Classification'].json['document_type'] }}\",\n  \"confidence\": {{ $node['Code: Parse Classification'].json['confidence'] }},\n  \"status\": \"{{ $node['Code: Parse Classification'].json['requires_review'] ? 'review_required' : 'processed' }}\"\n}",
+        "options": {}
+      },
+      "id": "2l3m4n5o-6p7q-8r9s-0t1u-2v3w4x5y6z7a",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Classify Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Classify Document": {
+      "main": [
+        [
+          {
+            "node": "Wait for Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Classification": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Get Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Get Classification": {
+      "main": [
+        [
+          {
+            "node": "Code: Parse Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parse Classification": {
+      "main": [
+        [
+          {
+            "node": "Switch: Route by Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch: Route by Type": {
+      "main": [
+        [
+          {
+            "node": "Process Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process Receipt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Contract to Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add to Review Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Invoice": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Receipt": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Contract to Database": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Review Queue": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Slack": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "3",
+      "name": "Document Classification"
+    },
+    {
+      "id": "2",
+      "name": "ImgGo"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-22T15:00:00.000Z",
+  "versionId": "1"
+}
