@@ -44,7 +44,7 @@ UPLOAD_RESPONSE=$(curl -s -X POST \
     "${IMGGO_BASE_URL}/patterns/${INVOICE_PATTERN_ID}/ingest" \
     -H "Authorization: Bearer ${IMGGO_API_KEY}" \
     -H "Idempotency-Key: ${IDEMPOTENCY_KEY}" \
-    -F "file=@${TEST_IMAGE}")
+    -F "image=@${TEST_IMAGE}")
 
 echo "Response:"
 echo "$UPLOAD_RESPONSE" | jq '.'
@@ -75,15 +75,15 @@ for ((i=1; i<=MAX_ATTEMPTS; i++)); do
 
     STATUS=$(echo "$STATUS_RESPONSE" | jq -r '.data.status')
 
-    if [ "$STATUS" == "completed" ]; then
+    if [ "$STATUS" == "completed" ] || [ "$STATUS" == "succeeded" ]; then
         echo -e "${GREEN}✓ Processing complete!${NC}"
         echo ""
         echo "=================================================="
         echo "EXTRACTED INVOICE DATA"
         echo "=================================================="
 
-        # Extract and display result
-        echo "$STATUS_RESPONSE" | jq '.data.result'
+        # Extract and display result (try manifest first, fallback to result)
+        echo "$STATUS_RESPONSE" | jq '.data.manifest // .data.result'
 
         # Save to file
         echo "$STATUS_RESPONSE" | jq '.data.result' > invoice_output.json

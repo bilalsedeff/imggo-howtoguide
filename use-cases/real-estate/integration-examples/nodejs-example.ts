@@ -94,7 +94,7 @@ async function uploadPropertyPhoto(imagePath: string): Promise<string> {
   }
 
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   console.log(`\nUploading property photo: ${path.basename(imagePath)}`);
 

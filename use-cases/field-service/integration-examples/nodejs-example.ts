@@ -32,7 +32,7 @@ async function uploadServicePhoto(imagePath: string): Promise<string> {
   if (!IMGGO_API_KEY) throw new Error('IMGGO_API_KEY not set');
 
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   const response = await axios.post(
     `${IMGGO_BASE_URL}/patterns/${FIELD_SERVICE_PATTERN_ID}/ingest`,
@@ -56,11 +56,12 @@ async function waitForResult(jobId: string): Promise<ServiceData> {
       { headers: { 'Authorization': `Bearer ${IMGGO_API_KEY}` } }
     );
 
-    const { status, result, error } = response.data.data;
+    const { status, manifest, result, error } = response.data.data;
 
-    if (status === 'completed') {
-      if (!result) throw new Error('No result');
-      return result;
+    if (status === 'completed' || status === 'succeeded') {
+      const data = manifest || result;
+      if (!data) throw new Error('No result');
+      return data;
     }
 
     if (status === 'failed') throw new Error(`Job failed: ${error}`);

@@ -67,7 +67,7 @@ async function uploadResume(imagePath: string): Promise<string> {
   }
 
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   console.log(`\nUploading resume: ${path.basename(imagePath)}`);
 
@@ -97,13 +97,14 @@ async function waitForResult(jobId: string, maxAttempts: number = 60): Promise<s
       }
     );
 
-    const { status, result, error } = response.data.data;
+    const { status, manifest, result, error } = response.data.data;
 
-    if (status === 'completed') {
-      if (!result) {
+    if (status === 'completed' || status === 'succeeded') {
+      const data = manifest || result;
+      if (!data) {
         throw new Error('No result in completed job');
       }
-      return result;
+      return data;
     }
 
     if (status === 'failed') {

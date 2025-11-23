@@ -72,7 +72,7 @@ async function uploadImage(imagePath: string, patternId: string): Promise<string
   console.log(`\nUploading image: ${imagePath}`);
 
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   const idempotencyKey = `nodejs-${path.basename(imagePath)}-${Date.now()}`;
 
@@ -128,14 +128,15 @@ async function waitForResult(
         }
       );
 
-      const { status, result, error } = response.data.data;
+      const { status, manifest, result, error } = response.data.data;
 
-      if (status === 'completed') {
-        if (!result) {
+      if (status === 'completed' || status === 'succeeded') {
+        const data = manifest || result;
+        if (!data) {
           throw new Error('Job completed but no result returned');
         }
         console.log('✓ Processing completed!');
-        return result;
+        return data;
       }
 
       if (status === 'failed') {

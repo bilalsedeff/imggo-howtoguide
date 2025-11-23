@@ -57,7 +57,7 @@ async function uploadVINImage(imagePath: string): Promise<string> {
   if (!IMGGO_API_KEY) throw new Error('IMGGO_API_KEY not set');
 
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   console.log(`\nUploading VIN image: ${path.basename(imagePath)}`);
 
@@ -83,11 +83,12 @@ async function waitForResult(jobId: string, maxAttempts: number = 60): Promise<s
       { headers: { 'Authorization': `Bearer ${IMGGO_API_KEY}` } }
     );
 
-    const { status, result, error } = response.data.data;
+    const { status, manifest, result, error } = response.data.data;
 
-    if (status === 'completed') {
-      if (!result) throw new Error('No result in completed job');
-      return result;
+    if (status === 'completed' || status === 'succeeded') {
+      const data = manifest || result;
+      if (!data) throw new Error('No result in completed job');
+      return data;
     }
 
     if (status === 'failed') {

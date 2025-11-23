@@ -57,7 +57,7 @@ async function uploadProductImage(imagePath: string): Promise<string> {
   if (!IMGGO_API_KEY) throw new Error('IMGGO_API_KEY not set');
 
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   console.log(`\nUploading product image: ${path.basename(imagePath)}`);
 

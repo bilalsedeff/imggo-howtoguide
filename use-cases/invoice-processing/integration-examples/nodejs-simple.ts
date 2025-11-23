@@ -43,7 +43,7 @@ async function processInvoice(imagePath: string): Promise<any> {
 
   // Step 1: Upload image directly to ImgGo
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   const uploadResponse = await axios.post<JobResponse>(
     `${IMGGO_BASE_URL}/patterns/${INVOICE_PATTERN_ID}/ingest`,
@@ -84,11 +84,11 @@ async function pollForResult(
       }
     );
 
-    const status = response.data.data.status;
+    const { status, manifest, result } = response.data.data;
 
-    if (status === 'completed') {
+    if (status === 'completed' || status === 'succeeded') {
       console.log('✓ Processing complete!');
-      return response.data.data.result;
+      return manifest || result;
     } else if (status === 'failed') {
       const error = response.data.data.error || 'Unknown error';
       throw new Error(`Job failed: ${error}`);

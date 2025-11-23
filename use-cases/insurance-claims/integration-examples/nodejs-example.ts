@@ -76,7 +76,7 @@ async function uploadClaim(imagePath: string): Promise<string> {
   }
 
   const formData = new FormData();
-  formData.append('file', fs.createReadStream(imagePath));
+  formData.append('image', fs.createReadStream(imagePath));
 
   console.log(`\nUploading insurance claim: ${path.basename(imagePath)}`);
 

@@ -46,7 +46,7 @@ UPLOAD_RESPONSE=$(curl -s -X POST \
     "${IMGGO_BASE_URL}/patterns/${REAL_ESTATE_PATTERN_ID}/ingest" \
     -H "Authorization: Bearer ${IMGGO_API_KEY}" \
     -H "Idempotency-Key: ${IDEMPOTENCY_KEY}" \
-    -F "file=@${TEST_IMAGE}")
+    -F "image=@${TEST_IMAGE}")
 
 # Extract job ID
 JOB_ID=$(echo "$UPLOAD_RESPONSE" | jq -r '.data.job_id')
