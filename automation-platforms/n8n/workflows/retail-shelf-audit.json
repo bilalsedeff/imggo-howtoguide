@@ -1,0 +1,343 @@
+{
+  "name": "Retail Shelf Audit: Dropbox → ImgGo → Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/ShelfAudits",
+        "triggerOn": "fileCreated",
+        "options": {}
+      },
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+      "name": "Dropbox Trigger",
+      "type": "n8n-nodes-base.dropboxTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.path_lower}}",
+              "operation": "regex",
+              "value2": "\\.(jpg|jpeg|png)$"
+            }
+          ]
+        }
+      },
+      "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+      "name": "Filter: Only Images",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "path": "={{$json.path_lower}}",
+        "options": {}
+      },
+      "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+      "name": "Dropbox: Get Share Link",
+      "type": "n8n-nodes-base.dropbox",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{ $env.SHELF_AUDIT_PATTERN_ID }}/ingest",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "=shelf-{{ $json.id }}-{{ $now.toUnixInteger() }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.link }}\"\n}",
+        "options": {}
+      },
+      "id": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
+      "name": "HTTP: Process with ImgGo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/jobs/{{ $node['HTTP: Process with ImgGo'].json['data']['job_id'] }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u",
+      "name": "HTTP: Get Analytics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse shelf audit analytics\nconst response = $input.item.json;\n\nif (response.data.status !== 'completed') {\n  throw new Error(`Audit not completed: ${response.data.status}`);\n}\n\nconst analytics = response.data.result;\n\n// Extract store info from Dropbox path\n// Format: /ShelfAudits/Store-123/2025-01-22/shelf-audit.jpg\nconst pathParts = $node['Dropbox Trigger'].json.path_display.split('/');\nconst storeId = pathParts[2] || 'Unknown';\n\nreturn {\n  store_id: storeId,\n  audit_date: $now.format('yyyy-MM-dd'),\n  total_facings: analytics.total_facings || 0,\n  unique_skus: analytics.products?.length || 0,\n  out_of_stock: analytics.out_of_stock_count || 0,\n  brand_share_your_brand: analytics.brand_share?.['Your Brand'] || 0,\n  brand_share_competitor_a: analytics.brand_share?.['Competitor A'] || 0,\n  planogram_compliance: analytics.planogram_compliance?.score || 0,\n  image_path: $node['Dropbox Trigger'].json.path_display,\n  raw_analytics: JSON.stringify(analytics)\n};"
+      },
+      "id": "7g8h9i0j-1k2l-3m4n-5o6p-7q8r9s0t1u2v",
+      "name": "Code: Parse Analytics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.GOOGLE_SHEETS_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audits",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Store ID": "={{ $json.store_id }}",
+            "Audit Date": "={{ $json.audit_date }}",
+            "Total Facings": "={{ $json.total_facings }}",
+            "Unique SKUs": "={{ $json.unique_skus }}",
+            "Out of Stock": "={{ $json.out_of_stock }}",
+            "Your Brand %": "={{ $json.brand_share_your_brand }}",
+            "Competitor A %": "={{ $json.brand_share_competitor_a }}",
+            "Compliance %": "={{ $json.planogram_compliance }}",
+            "Image Path": "={{ $json.image_path }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "8h9i0j1k-2l3m-4n5o-6p7q-8r9s0t1u2v3w",
+      "name": "Google Sheets: Append Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1650, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $node['Code: Parse Analytics'].json['out_of_stock'] }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ],
+          "boolean": [],
+          "string": []
+        },
+        "combineOperation": "any"
+      },
+      "id": "9i0j1k2l-3m4n-5o6p-7q8r-9s0t1u2v3w4x",
+      "name": "If: Out of Stock Alert",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "channel": "={{ $env.SLACK_CHANNEL }}",
+        "text": "=:warning: *Out of Stock Alert*\n\n*Store*: {{ $node['Code: Parse Analytics'].json['store_id'] }}\n*Out of Stock Items*: {{ $node['Code: Parse Analytics'].json['out_of_stock'] }}\n*Total SKUs*: {{ $node['Code: Parse Analytics'].json['unique_skus'] }}\n\n<https://docs.google.com/spreadsheets/d/{{ $env.GOOGLE_SHEETS_ID }}|View Full Audit>",
+        "otherOptions": {}
+      },
+      "id": "0j1k2l3m-4n5o-6p7q-8r9s-0t1u2v3w4x5y",
+      "name": "Slack: Send Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [2050, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "3",
+          "name": "Slack Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "path": "={{ $node['Dropbox Trigger'].json.path_display }}",
+        "toPath": "=/ShelfAudits/Processed/{{ $node['Code: Parse Analytics'].json['store_id'] }}/{{ $now.format('yyyy-MM') }}/{{ $node['Dropbox Trigger'].json.name }}"
+      },
+      "id": "1k2l3m4n-5o6p-7q8r-9s0t-1u2v3w4x5y6z",
+      "name": "Dropbox: Move to Processed",
+      "type": "n8n-nodes-base.dropbox",
+      "typeVersion": 2,
+      "position": [2050, 400]
+    }
+  ],
+  "connections": {
+    "Dropbox Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter: Only Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Only Images": {
+      "main": [
+        [
+          {
+            "node": "Dropbox: Get Share Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dropbox: Get Share Link": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Process with ImgGo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Process with ImgGo": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Analytics": {
+      "main": [
+        [
+          {
+            "node": "Code: Parse Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parse Analytics": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Append Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Append Row": {
+      "main": [
+        [
+          {
+            "node": "If: Out of Stock Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If: Out of Stock Alert": {
+      "main": [
+        [
+          {
+            "node": "Slack: Send Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Dropbox: Move to Processed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dropbox: Move to Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "8",
+      "name": "Retail"
+    },
+    {
+      "id": "9",
+      "name": "Shelf Audit"
+    },
+    {
+      "id": "2",
+      "name": "ImgGo"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-22T17:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,382 @@
+{
+  "name": "KYC Verification: Webhook → ImgGo → Salesforce",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "kyc-verification",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "kyc-verification-webhook"
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{ $env.KYC_PATTERN_ID }}/ingest",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "=kyc-{{ $json.applicant_id }}-{{ $now.toUnixInteger() }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.id_card_url }}\"\n}",
+        "options": {}
+      },
+      "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+      "name": "HTTP: Extract ID Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 25,
+        "unit": "seconds"
+      },
+      "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/jobs/{{ $node['HTTP: Extract ID Data'].json['data']['job_id'] }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
+      "name": "HTTP: Get ID Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse and validate ID data\nconst response = $input.item.json;\n\nif (response.data.status !== 'completed') {\n  throw new Error(`KYC extraction not completed: ${response.data.status}`);\n}\n\nconst idInfo = response.data.result;\n\n// Validation logic\nconst requiredFields = ['full_name', 'date_of_birth', 'id_number'];\nconst missingFields = requiredFields.filter(f => !idInfo[f]);\n\nif (missingFields.length > 0) {\n  return {\n    verification_status: 'failed',\n    verification_reason: `Missing required fields: ${missingFields.join(', ')}`,\n    ...idInfo\n  };\n}\n\n// Age verification\nconst dob = new Date(idInfo.date_of_birth);\nconst age = Math.floor((new Date() - dob) / (365.25 * 24 * 60 * 60 * 1000));\n\nif (age < 18) {\n  return {\n    verification_status: 'failed',\n    verification_reason: 'Applicant must be 18 years or older',\n    age: age,\n    ...idInfo\n  };\n}\n\n// Document expiry check\nif (idInfo.expiry_date) {\n  const expiry = new Date(idInfo.expiry_date);\n  if (expiry < new Date()) {\n    return {\n      verification_status: 'failed',\n      verification_reason: 'ID document has expired',\n      ...idInfo\n    };\n  }\n}\n\nreturn {\n  verification_status: 'passed',\n  verification_reason: 'All checks passed',\n  age: age,\n  ...idInfo\n};"
+      },
+      "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+      "name": "Code: Validate KYC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "rules": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.verification_status }}",
+                    "value2": "passed"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "passed"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.verification_status }}",
+                    "value2": "failed"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            }
+          ]
+        },
+        "fallbackOutput": "extra",
+        "options": {}
+      },
+      "id": "6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u",
+      "name": "Switch: Verification Result",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "operation": "create",
+        "firstName": "={{ $json.full_name.split(' ')[0] }}",
+        "lastName": "={{ $json.full_name.split(' ').slice(1).join(' ') }}",
+        "additionalFields": {
+          "customFieldsUi": {
+            "customFieldsValues": [
+              {
+                "fieldId": "KYC_Status__c",
+                "value": "=Verified"
+              },
+              {
+                "fieldId": "KYC_Verified_Date__c",
+                "value": "={{ $now.format('yyyy-MM-dd') }}"
+              },
+              {
+                "fieldId": "Date_of_Birth__c",
+                "value": "={{ $json.date_of_birth }}"
+              },
+              {
+                "fieldId": "ID_Number__c",
+                "value": "={{ $json.id_number }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7g8h9i0j-1k2l-3m4n-5o6p-7q8r9s0t1u2v",
+      "name": "Salesforce: Create Lead (Approved)",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [1450, 200],
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "4",
+          "name": "Salesforce Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "kyc_rejections",
+        "columns": "applicant_id, full_name, rejection_reason, id_data, rejected_at",
+        "additionalFields": {}
+      },
+      "id": "8h9i0j1k-2l3m-4n5o-6p7q-8r9s0t1u2v3w",
+      "name": "PostgreSQL: Log Rejection",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1450, 400],
+      "credentials": {
+        "postgres": {
+          "id": "2",
+          "name": "PostgreSQL Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"applicant_id\": \"{{ $node['Webhook'].json['applicant_id'] }}\",\n  \"verification_status\": \"{{ $json.verification_status }}\",\n  \"verification_reason\": \"{{ $json.verification_reason }}\",\n  \"next_steps\": \"{{ $json.verification_status === 'passed' ? 'Account activation email sent' : 'Manual review required' }}\"\n}",
+        "options": {}
+      },
+      "id": "9i0j1k2l-3m4n-5o6p-7q8r-9s0t1u2v3w4x",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node['Webhook'].json['applicant_email'] }}",
+        "subject": "=Welcome! Your account has been verified",
+        "emailType": "html",
+        "message": "=<html>\n<body>\n<h2>Welcome to Our Platform!</h2>\n<p>Hi {{ $json.full_name }},</p>\n<p>Great news! Your identity has been successfully verified.</p>\n<p>You can now access all platform features.</p>\n<p><a href=\"https://app.example.com/login\">Login to Your Account</a></p>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "0j1k2l3m-4n5o-6p7q-8r9s-0t1u2v3w4x5y",
+      "name": "Email: Send Welcome",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1650, 100],
+      "credentials": {
+        "smtp": {
+          "id": "3",
+          "name": "SMTP Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node['Webhook'].json['applicant_email'] }}",
+        "subject": "=Identity Verification Required",
+        "emailType": "html",
+        "message": "=<html>\n<body>\n<h2>Additional Verification Required</h2>\n<p>Hi {{ $json.full_name }},</p>\n<p>We were unable to automatically verify your identity.</p>\n<p><strong>Reason:</strong> {{ $json.verification_reason }}</p>\n<p>Our team will review your application manually. You'll receive an update within 24-48 hours.</p>\n<p>Questions? Contact support@example.com</p>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "1k2l3m4n-5o6p-7q8r-9s0t-1u2v3w4x5y6z",
+      "name": "Email: Request Manual Review",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1650, 500],
+      "credentials": {
+        "smtp": {
+          "id": "3",
+          "name": "SMTP Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Extract ID Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Extract ID Data": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get ID Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get ID Result": {
+      "main": [
+        [
+          {
+            "node": "Code: Validate KYC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Validate KYC": {
+      "main": [
+        [
+          {
+            "node": "Switch: Verification Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch: Verification Result": {
+      "main": [
+        [
+          {
+            "node": "Salesforce: Create Lead (Approved)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PostgreSQL: Log Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salesforce: Create Lead (Approved)": {
+      "main": [
+        [
+          {
+            "node": "Email: Send Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Send Welcome": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL: Log Rejection": {
+      "main": [
+        [
+          {
+            "node": "Email: Request Manual Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Request Manual Review": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "10",
+      "name": "KYC"
+    },
+    {
+      "id": "11",
+      "name": "Verification"
+    },
+    {
+      "id": "2",
+      "name": "ImgGo"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-22T17:30:00.000Z",
+  "versionId": "1"
+}
