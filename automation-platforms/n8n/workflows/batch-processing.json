@@ -1,0 +1,459 @@
+{
+  "name": "Batch Image Processing - Scheduled",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+      "name": "Cron: Daily at 2 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "bucket": "={{ $env.S3_BUCKET_NAME }}",
+        "prefix": "pending-processing/",
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+      "name": "AWS S3: List Images",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "aws": {
+          "id": "5",
+          "name": "AWS Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.Size }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ],
+          "string": [
+            {
+              "value1": "={{ $json.Key }}",
+              "operation": "endsWith",
+              "value2": ".jpg"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+      "name": "Filter: Valid Images",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "id": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate presigned URL for S3 object\nconst AWS = require('aws-sdk');\n\nconst s3 = new AWS.S3({\n  accessKeyId: $env.AWS_ACCESS_KEY_ID,\n  secretAccessKey: $env.AWS_SECRET_ACCESS_KEY,\n  region: $env.AWS_REGION\n});\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const params = {\n    Bucket: $env.S3_BUCKET_NAME,\n    Key: item.json.Key,\n    Expires: 3600 // URL valid for 1 hour\n  };\n\n  const url = s3.getSignedUrl('getObject', params);\n\n  results.push({\n    json: {\n      key: item.json.Key,\n      image_url: url,\n      size: item.json.Size\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t",
+      "name": "Code: Generate S3 URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/patterns/{{ $env.IMGGO_INVENTORY_PATTERN }}/ingest",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "=batch-{{ $json.key.replace(/[^a-zA-Z0-9]/g, '-') }}-{{ $now.toUnixInteger() }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $json.image_url }}\"\n}",
+        "options": {}
+      },
+      "id": "6f7g8h9i-0j1k-2l3m-4n5o-6p7q8r9s0t1u",
+      "name": "HTTP Request: Process with ImgGo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "id": "7g8h9i0j-1k2l-3m4n-5o6p-7q8r9s0t1u2v",
+      "name": "Wait for Processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://img-go.com/api/jobs/{{ $node['HTTP Request: Process with ImgGo'].json['data']['job_id'] }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "8h9i0j1k-2l3m-4n5o-6p7q-8r9s0t1u2v3w",
+      "name": "HTTP Request: Get Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "ImgGo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse inventory result\nconst response = $input.item.json;\n\nif (response.data.status !== 'completed') {\n  return [{\n    json: {\n      status: 'failed',\n      key: $node['Code: Generate S3 URLs'].json.key,\n      error: `Not completed: ${response.data.status}`\n    }\n  }];\n}\n\nconst result = response.data.result;\nconst key = $node['Code: Generate S3 URLs'].json.key;\n\n// Extract location from S3 key (e.g., pending-processing/warehouse-A/shelf-12.jpg)\nconst pathParts = key.split('/');\nconst location = pathParts[1] || 'unknown';\n\nreturn [{\n  json: {\n    status: 'completed',\n    location: location,\n    filename: pathParts[pathParts.length - 1],\n    s3_key: key,\n    inventory_data: result,\n    processed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "9i0j1k2l-3m4n-5o6p-7q8r-9s0t1u2v3w4x",
+      "name": "Code: Parse Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "bucket": "={{ $env.S3_BUCKET_NAME }}",
+        "fileKey": "={{ $json.s3_key }}",
+        "destinationKey": "=processed/{{ $json.s3_key.replace('pending-processing/', '') }}",
+        "options": {}
+      },
+      "id": "0j1k2l3m-4n5o-6p7q-8r9s-0t1u2v3w4x5y",
+      "name": "AWS S3: Move to Processed",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 1,
+      "position": [2050, 300],
+      "credentials": {
+        "aws": {
+          "id": "5",
+          "name": "AWS Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1k2l3m4n-5o6p-7q8r-9s0t-1u2v3w4x5y6z",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "2l3m4n5o-6p7q-8r9s-0t1u-2v3w4x5y6z7a",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate CSV report from all results\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [{ json: { csv: 'No items processed', total_count: 0 } }];\n}\n\n// CSV header\nlet csv = 'Location,Filename,Status,Products,Total_Items,Processed_At\\n';\n\n// Add rows\nfor (const item of items) {\n  const data = item.json;\n\n  const products = data.inventory_data?.products?.length || 0;\n  const totalItems = data.inventory_data?.total_count || 0;\n\n  csv += `${data.location},${data.filename},${data.status},${products},${totalItems},${data.processed_at}\\n`;\n}\n\n// Calculate summary\nconst totalProcessed = items.length;\nconst successful = items.filter(i => i.json.status === 'completed').length;\nconst failed = totalProcessed - successful;\n\nreturn [{\n  json: {\n    csv: csv,\n    total_processed: totalProcessed,\n    successful: successful,\n    failed: failed,\n    report_date: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "3m4n5o6p-7q8r-9s0t-1u2v-3w4x5y6z7a8b",
+      "name": "Code: Generate CSV Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [2650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucket": "={{ $env.S3_BUCKET_NAME }}",
+        "fileName": "=reports/inventory-{{ $now.format('yyyy-MM-dd') }}.csv",
+        "binaryData": false,
+        "fileContent": "={{ $json.csv }}",
+        "options": {}
+      },
+      "id": "4n5o6p7q-8r9s-0t1u-2v3w-4x5y6z7a8b9c",
+      "name": "AWS S3: Save Report",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 1,
+      "position": [2850, 300],
+      "credentials": {
+        "aws": {
+          "id": "5",
+          "name": "AWS Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.REPORT_EMAIL }}",
+        "subject": "=Daily Inventory Report - {{ $now.format('yyyy-MM-dd') }}",
+        "emailType": "text",
+        "message": "=Daily Inventory Processing Report\\n{{ $now.format('yyyy-MM-dd HH:mm:ss') }}\\n\\n=====================================\\nSummary:\\n  Total Images Processed: {{ $json.total_processed }}\\n  Successful: {{ $json.successful }}\\n  Failed: {{ $json.failed }}\\n\\nDetailed report attached as CSV in S3:\\ns3://{{ $env.S3_BUCKET_NAME }}/reports/inventory-{{ $now.format('yyyy-MM-dd') }}.csv\\n\\nNext scheduled run: Tomorrow at 2:00 AM",
+        "attachments": "={{ $json.csv }}",
+        "options": {}
+      },
+      "id": "5o6p7q8r-9s0t-1u2v-3w4x-5y6z7a8b9c0d",
+      "name": "Send Email Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [3050, 300],
+      "credentials": {
+        "smtp": {
+          "id": "3",
+          "name": "SMTP Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "={{ $env.SLACK_CHANNEL }}",
+        "text": "=:clipboard: *Daily Inventory Report*\\n\\n*Date:* {{ $now.format('yyyy-MM-dd') }}\\n*Total Processed:* {{ $node['Code: Generate CSV Report'].json.total_processed }}\\n*Successful:* {{ $node['Code: Generate CSV Report'].json.successful }}\\n*Failed:* {{ $node['Code: Generate CSV Report'].json.failed }}\\n\\n:white_check_mark: Report saved to S3 and emailed",
+        "otherOptions": {}
+      },
+      "id": "6p7q8r9s-0t1u-2v3w-4x5y-6z7a8b9c0d1e",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [3250, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "4",
+          "name": "Slack Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron: Daily at 2 AM": {
+      "main": [
+        [
+          {
+            "node": "AWS S3: List Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS S3: List Images": {
+      "main": [
+        [
+          {
+            "node": "Filter: Valid Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Valid Images": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Code: Generate S3 URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Generate S3 URLs": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Process with ImgGo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Process with ImgGo": {
+      "main": [
+        [
+          {
+            "node": "Wait for Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Processing": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Get Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Get Results": {
+      "main": [
+        [
+          {
+            "node": "Code: Parse Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parse Results": {
+      "main": [
+        [
+          {
+            "node": "AWS S3: Move to Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS S3: Move to Processed": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Code: Generate CSV Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Generate CSV Report": {
+      "main": [
+        [
+          {
+            "node": "AWS S3: Save Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS S3: Save Report": {
+      "main": [
+        [
+          {
+            "node": "Send Email Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Report": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "6",
+      "name": "Batch Processing"
+    },
+    {
+      "id": "7",
+      "name": "Inventory"
+    },
+    {
+      "id": "2",
+      "name": "ImgGo"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-22T16:00:00.000Z",
+  "versionId": "1"
+}
