@@ -27,6 +27,60 @@ Automated VIN capture with XML output for automotive systems integration:
 
 **Result**: 99% accuracy, 10-second capture, seamless system integration.
 
+## Quick Start
+
+### Step 1: Create Your Pattern (One-Time Setup)
+
+Choose your preferred method to create the pattern:
+
+#### Option A: Using Python Script
+
+```bash
+cd use-cases/vin-extraction
+python create-pattern.py
+```
+
+#### Option B: Using curl Script
+
+```bash
+cd use-cases/vin-extraction
+bash create-pattern.sh
+```
+
+Both scripts will:
+
+- Create a pattern optimized for VIN extraction
+- Save the Pattern ID to `pattern_id.txt`
+- Display instructions for adding it to your `.env` file
+
+#### Add to your .env file
+
+```bash
+IMGGO_API_KEY=your_api_key_here
+VIN_PATTERN_ID=pattern_id_from_script
+```
+
+### Step 2: Test the Pattern
+
+Test with a sample VIN image:
+
+```bash
+# Python
+python test-pattern.py
+
+# curl
+bash test-pattern.sh
+```
+
+Results will be saved to `outputs/vin1_output.json`
+
+### Step 3: Integrate with Your System
+
+See the `integration-examples/` folder for production-ready integrations:
+
+- [Python Fleet Management Integration](./integration-examples/python-example.py) - VIN decoding and fleet system sync
+- [TypeScript/Node.js](./integration-examples/nodejs-example.ts) - Express.js webhook server
+
 ## What Gets Extracted
 
 ### XML Output for Automotive Systems

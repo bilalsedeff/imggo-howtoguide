@@ -10,48 +10,66 @@ This repository provides practical, end-to-end solutions for automating image da
 
 ## What You'll Find Here
 
-- **20+ Real-World Use Cases**: Invoice processing, retail audits, construction tracking, medical records, insurance claims, and more
-- **Complete Integration Guides**: n8n, Zapier, Make, Power Automate, and direct API implementations
-- **Database Connectors**: PostgreSQL, MySQL, MongoDB, Google Sheets, Airtable, Salesforce
-- **Production-Ready Code**: Python, Node.js, cURL examples with error handling and best practices
-- **End-to-End Workflows**: From image upload to structured data storage
+- **📁 20+ Real-World Use Cases**: Invoice processing, retail audits, construction tracking, medical records, insurance claims, and more
+- **🔌 Complete Integration Guides**: n8n, Zapier, Make, Power Automate, and direct API implementations
+- **💾 Database Connectors**: PostgreSQL, Google Sheets, and more
+- **💻 Production-Ready Code**: Python, Node.js, cURL examples with error handling and best practices
+- **🔄 End-to-End Workflows**: From image upload to structured data storage
+
+## Repository Structure
+
+```
+├── docs/                    # Documentation
+│   ├── getting-started/     # Quick start, authentication, first pattern
+│   ├── api-reference/       # API endpoints, webhooks, error handling
+│   └── guides/              # Best practices and advanced topics
+├── examples/                # Code examples
+│   ├── languages/           # Python, Node.js, cURL, Postman
+│   ├── formats/             # JSON, CSV, XML, YAML, Plain Text
+│   ├── common/              # Shared utilities and helpers
+│   └── test-images/         # Sample images for testing
+├── integrations/            # Platform integrations
+│   ├── automation/          # n8n, Zapier, Make, Power Automate
+│   └── databases/           # PostgreSQL, Google Sheets
+└── use-cases/               # 20 industry-specific use cases
+```
 
 ## Quick Start
 
-1. **Choose Your Use Case**: Browse the [use-cases](./use-cases) directory
-2. **Select Your Platform**: n8n, Zapier, Make, or custom implementation
+1. **Choose Your Use Case**: Browse the [use-cases/](./use-cases) directory
+2. **Read the Docs**: Start with [Getting Started](./docs/getting-started/quick-start.md)
 3. **Follow the Guide**: Each use case includes step-by-step instructions
 4. **Deploy & Scale**: Production-ready examples with webhooks and automation
 
-## Use Cases
+## 📚 Use Cases
 
 ### Finance & Accounting
 
 - [Invoice Processing](./use-cases/invoice-processing) - Extract invoice data and sync to ERP/accounting systems
-- [Receipt Management](./use-cases/expense-management) - Automate expense report processing
-- [Financial Document Classification](./use-cases/document-classification) - Categorize and route financial documents
+- [Expense Management](./use-cases/expense-management) - Automate expense report processing
+- [Document Classification](./use-cases/document-classification) - Categorize and route financial documents
 
 ### Retail & E-commerce
 
-- [Shelf Audit Automation](./use-cases/retail-shelf-audit) - Monitor stock levels, planogram compliance, and shelf share
-- [Product Catalog Automation](./use-cases/product-catalog) - Extract product info from images for listings
+- [Retail Shelf Audit](./use-cases/retail-shelf-audit) - Monitor stock levels, planogram compliance, and shelf share
+- [Product Catalog](./use-cases/product-catalog) - Extract product info from images for listings
 - [Inventory Management](./use-cases/inventory-management) - Visual inventory counting and tracking
 
 ### Healthcare
 
-- [Medical Prescription Processing](./use-cases/medical-prescription) - Digitize handwritten prescriptions
-- [Medical Records Digitization](./use-cases/medical-records) - Extract patient data from forms and reports
-- [KYC Patient Verification](./use-cases/kyc-verification) - Automated identity verification for onboarding
+- [Medical Prescription](./use-cases/medical-prescription) - Digitize handwritten prescriptions
+- [Medical Records](./use-cases/medical-records) - Extract patient data from forms and reports
+- [KYC Verification](./use-cases/kyc-verification) - Automated identity verification for onboarding
 
-### Insurance & Claims
+### Insurance & Field Service
 
-- [Damage Assessment](./use-cases/insurance-claims) - Automated claim processing from damage photos
-- [Field Service Reports](./use-cases/field-service) - Technician photo documentation and reporting
+- [Insurance Claims](./use-cases/insurance-claims) - Automated claim processing from damage photos
+- [Field Service](./use-cases/field-service) - Technician photo documentation and reporting
 
 ### Construction & Real Estate
 
-- [Construction Progress Tracking](./use-cases/construction-tracking) - Monitor project milestones from site photos
-- [Real Estate Listing Automation](./use-cases/real-estate) - Generate property listings from photos
+- [Construction Progress](./use-cases/construction-progress) - Monitor project milestones from site photos
+- [Real Estate](./use-cases/real-estate) - Generate property listings from photos
 
 ### Automotive
 
@@ -60,56 +78,88 @@ This repository provides practical, end-to-end solutions for automating image da
 
 ### Compliance & Security
 
-- [GDPR Image Anonymization](./use-cases/gdpr-anonymization) - Automated face and PII blurring
+- [GDPR Anonymization](./use-cases/gdpr-anonymization) - Automated face and PII blurring
 - [Content Moderation](./use-cases/content-moderation) - Visual content screening and compliance
-- [Food Safety Compliance](./use-cases/food-safety) - Restaurant inspection report automation
+- [Food Safety](./use-cases/food-safety) - Restaurant inspection report automation
 
 ### Operations
 
 - [Quality Control](./use-cases/quality-control) - Manufacturing defect detection
-- [Resume/CV Parsing](./use-cases/resume-parsing) - Automated candidate data extraction
+- [Resume Parsing](./use-cases/resume-parsing) - Automated candidate data extraction
 
-## Automation Platforms
+[View all 20 use cases →](./use-cases/)
 
-### No-Code/Low-Code
+## 🔌 Integrations
 
-- [n8n](./automation-platforms/n8n) - Open-source workflow automation with visual editor
-- [Zapier](./automation-platforms/zapier) - Quick integration with 5,000+ apps
-- [Make](./automation-platforms/make) - Advanced automation with complex routing
-- [Power Automate](./automation-platforms/power-automate) - Microsoft ecosystem integration
+### Automation Platforms
 
-### Custom Development
+Build no-code/low-code workflows with visual automation tools:
 
-- [Python Examples](./examples/python) - Production-ready scripts with error handling
-- [Node.js Examples](./examples/nodejs) - Async/await patterns and best practices
-- [cURL Examples](./examples/curl) - Quick testing and debugging
-- [Postman Collection](./examples/postman) - Interactive API exploration
+- [n8n](./integrations/automation/n8n) - Open-source workflow automation with 350+ integrations
+- [Zapier](./integrations/automation/zapier) - Quick integration with 5,000+ apps
+- [Make](./integrations/automation/make) - Advanced automation with complex routing
+- [Power Automate](./integrations/automation/power-automate) - Microsoft ecosystem integration
 
-## Integration Guides
+### Databases
 
-Connect your image processing workflows to databases and business tools:
+Connect to production databases and storage systems:
 
-- [PostgreSQL](./integration-guides/postgresql.md) - Relational data storage
-- [MySQL](./integration-guides/mysql.md) - Traditional database integration
-- [MongoDB](./integration-guides/mongodb.md) - Document-based storage
-- [Google Sheets](./integration-guides/google-sheets.md) - Spreadsheet automation
-- [Airtable](./integration-guides/airtable.md) - Modern database workflows
-- [Salesforce](./integration-guides/salesforce.md) - CRM integration
-- [Webhook Endpoints](./integration-guides/webhook-endpoints.md) - Real-time notifications
+- [PostgreSQL](./integrations/databases/postgresql.md) - Relational data storage
+- [Google Sheets](./integrations/databases/google-sheets.md) - Spreadsheet automation
 
-## Output Format Examples
+[View all integrations →](./integrations/)
 
-Choose the format that best fits your integration needs:
+## 💻 Code Examples
+
+### By Programming Language
+
+- [Python](./examples/languages/python/) - Production-ready scripts with error handling
+- [Node.js](./examples/languages/nodejs/) - Async/await patterns and best practices
+- [cURL](./examples/languages/curl/) - Quick testing and debugging
+- [Postman](./examples/languages/postman/) - Interactive API exploration
+
+### By Output Format
+
+- [JSON](./examples/formats/json/) - Modern web apps, APIs, NoSQL databases
+- [CSV](./examples/formats/csv/) - Spreadsheets, data analysis, bulk imports
+- [XML](./examples/formats/xml/) - Legacy systems, SOAP services, industry standards
+- [YAML](./examples/formats/yaml/) - Configuration files, DevOps, Kubernetes
+- [Plain Text](./examples/formats/plaintext/) - Human-readable reports and summaries
+
+[View all examples →](./examples/)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Basic understanding of REST APIs
+- API key from your image processing provider
+- Target system credentials (database, webhook endpoint, etc.)
+
+### Your First Workflow
+
+1. Read the [Quick Start Guide](./docs/getting-started/quick-start.md)
+2. Learn about [Authentication](./docs/getting-started/authentication.md)
+3. Create your [First Pattern](./docs/getting-started/first-pattern.md)
+4. Choose a [Use Case](./use-cases) that matches your needs
+5. Deploy and scale
+
+## 📖 Documentation
+
+Complete technical documentation:
+
+- [API Endpoints](./docs/api-reference/endpoints.md) - Complete API reference
+- [Webhooks](./docs/api-reference/webhooks.md) - Real-time event notifications
+- [Error Handling](./docs/api-reference/error-handling.md) - Common errors and solutions
+- [Rate Limits](./docs/api-reference/rate-limits.md) - Understanding quotas and throttling
+
+[View all documentation →](./docs/)
+
+## 📊 Output Format Examples
 
 ### Image to JSON
 
 Perfect for APIs, modern apps, and NoSQL databases. Most popular format for web applications.
-
-- [Invoice to JSON](./use-cases/invoice-processing) - Extract invoice data as JSON objects
-- [Shelf Audit to JSON](./use-cases/retail-shelf-audit) - Product detection with nested JSON arrays
-- [Damage Assessment to JSON](./use-cases/insurance-claims) - Structured damage reports
-
-**Quick Example**:
 
 ```json
 {
@@ -120,15 +170,11 @@ Perfect for APIs, modern apps, and NoSQL databases. Most popular format for web 
 }
 ```
 
+**Use cases**: [Invoice Processing](./use-cases/invoice-processing), [Retail Shelf Audit](./use-cases/retail-shelf-audit), [Insurance Claims](./use-cases/insurance-claims)
+
 ### Image to CSV
 
-Ideal for spreadsheets, data analysis, and bulk imports. Great for business users.
-
-- [Shelf Products to CSV](./use-cases/retail-shelf-audit) - Export product lists for Excel analysis
-- [Receipt Batch to CSV](./use-cases/expense-management) - Monthly expense reports
-- [Inventory Count to CSV](./use-cases/inventory-management) - Stock level exports
-
-**Quick Example**:
+Ideal for spreadsheets, data analysis, and bulk imports.
 
 ```csv
 Product,Brand,Price,In Stock
@@ -136,33 +182,24 @@ Coca-Cola 2L,Coca-Cola,2.99,Yes
 Pepsi 2L,Pepsi,2.79,Yes
 ```
 
+**Use cases**: [Inventory Management](./use-cases/inventory-management), [Expense Management](./use-cases/expense-management)
+
 ### Image to Plain Text
 
-Extract human-readable narratives from images. Perfect for reports and documentation.
-
-- [Prescription to Text](./use-cases/medical-prescription) - Readable prescription instructions
-- [Inspection Report to Text](./use-cases/quality-control) - Manufacturing inspection narratives
-- [Field Notes to Text](./use-cases/field-service) - Technician observation reports
-
-**Quick Example**:
+Extract human-readable narratives from images.
 
 ```text
 Prescription for John Doe
 Medication: Amoxicillin 500mg
 Dosage: Take one capsule three times daily with food
 Duration: 10 days
-Refills: None
 ```
+
+**Use cases**: [Medical Prescription](./use-cases/medical-prescription), [Quality Control](./use-cases/quality-control), [Field Service](./use-cases/field-service)
 
 ### Image to XML
 
-Legacy system integration and enterprise applications. Common in healthcare and finance.
-
-- [Medical Records to XML](./use-cases/medical-records) - HL7 FHIR compliance
-- [Financial Documents to XML](./use-cases/document-classification) - XBRL format
-- [Quality Control to XML](./use-cases/quality-control) - Manufacturing standards (ISO)
-
-**Quick Example**:
+Legacy system integration and enterprise applications.
 
 ```xml
 <invoice>
@@ -172,65 +209,21 @@ Legacy system integration and enterprise applications. Common in healthcare and 
 </invoice>
 ```
 
+**Use cases**: [Parking Management](./use-cases/parking-management), [Medical Records](./use-cases/medical-records)
+
 ### Image to YAML
 
-Configuration files and human-readable structured data. Popular in DevOps.
-
-- [Construction Reports to YAML](./use-cases/construction-tracking) - Progress tracking configs
-- [Inventory Manifests to YAML](./use-cases/inventory-management) - Warehouse configurations
-- [Asset Tags to YAML](./use-cases/field-service) - Equipment metadata
-
-**Quick Example**:
+Configuration files and human-readable structured data.
 
 ```yaml
 vendor_name: Acme Corp
 invoice_number: INV-2024-001
 total_amount: 1942.92
-line_items:
-  - description: Professional Services
-    amount: 1500.00
 ```
 
-## Upload Methods
+**Use cases**: [Construction Progress](./use-cases/construction-progress), [Inventory Management](./use-cases/inventory-management)
 
-### Direct Image Upload
-
-Upload images directly from your application via multipart form-data:
-
-```bash
-curl -X POST https://img-go.com/api/patterns/{pattern_id}/ingest \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "file=@/path/to/invoice.jpg"
-```
-
-**Best for**: Mobile apps, web forms, desktop applications
-
-**Examples**:
-
-- [Mobile Receipt Upload](./use-cases/expense-management) - React Native camera integration
-- [Web Form Submission](./use-cases/kyc-verification) - ID card upload from browser
-- [Desktop Batch Upload](./use-cases/invoice-processing) - Folder watching automation
-
-### Image URL Processing
-
-Process images from public URLs (S3, CDN, cloud storage):
-
-```bash
-curl -X POST https://img-go.com/api/patterns/{pattern_id}/ingest \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"image_url": "https://your-cdn.com/invoice.jpg"}'
-```
-
-**Best for**: Cloud workflows, email attachments, scheduled jobs
-
-**Examples**:
-
-- [Email Attachment Processing](./use-cases/invoice-processing) - Gmail API → CDN → Processing
-- [Dropbox Folder Watch](./use-cases/retail-shelf-audit) - Auto-process new uploads
-- [S3 Trigger Processing](./use-cases/construction-tracking) - AWS Lambda workflows
-
-## Architecture Pattern
+## 🏗️ Architecture Pattern
 
 All use cases follow this proven architecture:
 
@@ -245,40 +238,7 @@ Image Source → API Processing → Structured Output → Storage/Action
 3. **Structured Output**: Consistent JSON, YAML, XML, CSV, or text format
 4. **Integration**: Store in databases, trigger webhooks, or feed downstream systems
 
-## Getting Started
-
-### Prerequisites
-
-- Basic understanding of REST APIs
-- API key from your image processing provider
-- Target system credentials (database, webhook endpoint, etc.)
-
-### Your First Workflow
-
-1. Read the [Quick Start Guide](./getting-started/quick-start.md)
-2. Learn about [Authentication](./getting-started/authentication.md)
-3. Create your [First Pattern](./getting-started/first-pattern.md)
-4. Choose a [Use Case](./use-cases) that matches your needs
-5. Deploy and scale
-
-## API Reference
-
-- [Endpoints](./api-reference/endpoints.md) - Complete API documentation
-- [Error Handling](./api-reference/error-handling.md) - Common errors and solutions
-- [Rate Limits](./api-reference/rate-limits.md) - Understanding quotas and throttling
-- [Webhooks](./api-reference/webhooks.md) - Real-time event notifications
-
-## Best Practices
-
-- **Idempotency**: Use unique request IDs to prevent duplicate processing
-- **Webhooks**: Implement async processing for high-volume workflows
-- **Error Handling**: Implement retry logic with exponential backoff
-- **Rate Limiting**: Respect quota limits and implement request queuing
-- **Security**: Never commit API keys; use environment variables
-- **Validation**: Always validate structured output before storage
-- **Monitoring**: Track success rates, latency, and error patterns
-
-## Example: Invoice Processing Pipeline
+## 📝 Example: Invoice Processing Pipeline
 
 A complete invoice processing workflow in 3 steps:
 
@@ -302,13 +262,13 @@ A complete invoice processing workflow in 3 steps:
 ### 2. Process Image
 
 ```bash
-curl -X POST https://api.your-provider.com/patterns/{pattern_id}/ingest \
+curl -X POST https://img-go.com/api/patterns/{pattern_id}/ingest \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"image_url": "https://your-cdn.com/invoice.jpg"}'
 ```
 
-### 3. Store Results (via webhook or polling)
+### 3. Store Results
 
 ```python
 # Automatically inserted into PostgreSQL
@@ -317,19 +277,31 @@ VALUES (result['vendor_name'], result['invoice_number'],
         result['date'], result['total_amount']);
 ```
 
-### Contributing
+**[See complete implementation →](./use-cases/invoice-processing)**
+
+## ✅ Best Practices
+
+- **Idempotency**: Use unique request IDs to prevent duplicate processing
+- **Webhooks**: Implement async processing for high-volume workflows
+- **Error Handling**: Implement retry logic with exponential backoff
+- **Rate Limiting**: Respect quota limits and implement request queuing
+- **Security**: Never commit API keys; use environment variables
+- **Validation**: Always validate structured output before storage
+- **Monitoring**: Track success rates, latency, and error patterns
+
+## 🤝 Contributing
 
 This is a living document. Use cases, examples, and integrations are continuously updated based on real-world implementations.
 
-### Support
+## 📧 Support
 
-- Review the [API Reference](./api-reference) for detailed documentation
-- Check [Integration Guides](./integration-guides) for specific platform instructions
-- Explore [Use Cases](./use-cases) for complete examples
+- Review the [Documentation](./docs/) for detailed guides
+- Check [Integrations](./integrations/) for specific platform instructions
+- Explore [Use Cases](./use-cases/) for complete examples
 
-### License
+## 📄 License
 
-MIT License - See LICENSE file for details
+MIT License - See [LICENSE](./LICENSE) file for details
 
 ---
 

@@ -27,6 +27,60 @@ Automated prescription digitization with AI-powered OCR:
 
 **Result**: 90% faster processing, 50% reduction in transcription errors, better patient safety.
 
+## Quick Start
+
+### Step 1: Create Your Pattern (One-Time Setup)
+
+Choose your preferred method to create the pattern:
+
+#### Option A: Using Python Script
+
+```bash
+cd use-cases/medical-prescription
+python create-pattern.py
+```
+
+#### Option B: Using curl Script
+
+```bash
+cd use-cases/medical-prescription
+bash create-pattern.sh
+```
+
+Both scripts will:
+
+- Create a pattern optimized for prescription processing
+- Save the Pattern ID to `pattern_id.txt`
+- Display instructions for adding it to your `.env` file
+
+#### Add to your .env file
+
+```bash
+IMGGO_API_KEY=your_api_key_here
+PRESCRIPTION_PATTERN_ID=pattern_id_from_script
+```
+
+### Step 2: Test the Pattern
+
+Test with a sample prescription:
+
+```bash
+# Python
+python test-pattern.py
+
+# curl
+bash test-pattern.sh
+```
+
+Results will be saved to `outputs/prescription1_output.txt`
+
+### Step 3: Integrate with Your System
+
+See the `integration-examples/` folder for production-ready integrations:
+
+- [Python Pharmacy Integration](./integration-examples/python-example.py) - Full pharmacy workflow
+- [TypeScript/Node.js](./integration-examples/nodejs-example.ts) - Express.js webhook server
+
 ## What Gets Extracted
 
 ### Plain Text Output (Human-Readable)

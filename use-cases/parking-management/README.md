@@ -25,6 +25,37 @@ Traditional LPR systems require expensive specialized hardware and proprietary s
 
 ---
 
+## Quick Start
+
+### Step 1: Create Your Pattern (One-Time Setup)
+
+```bash
+cd use-cases/parking-management
+python create-pattern.py
+# or: bash create-pattern.sh
+```
+
+Add to your `.env` file:
+```bash
+IMGGO_API_KEY=your_api_key_here
+PARKING_PATTERN_ID=pattern_id_from_script
+```
+
+### Step 2: Test the Pattern
+
+```bash
+python test-pattern.py
+# or: bash test-pattern.sh
+```
+
+Results will be saved to `outputs/parking1_output.xml`
+
+### Step 3: Integrate
+
+See `integration-examples/` for production-ready integrations.
+
+---
+
 ## The Solution
 
 ImgGo extracts license plate data, vehicle attributes, and parking metadata from camera images and outputs **XML streams** that integrate with existing parking management software:

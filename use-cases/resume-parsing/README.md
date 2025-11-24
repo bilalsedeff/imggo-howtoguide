@@ -28,6 +28,60 @@ Automated resume extraction with direct file upload:
 
 **Result**: 90% time savings, 5-minute candidate screening, improved candidate experience.
 
+## Quick Start
+
+### Step 1: Create Your Pattern (One-Time Setup)
+
+Choose your preferred method to create the pattern:
+
+#### Option A: Using Python Script
+
+```bash
+cd use-cases/resume-parsing
+python create-pattern.py
+```
+
+#### Option B: Using curl Script
+
+```bash
+cd use-cases/resume-parsing
+bash create-pattern.sh
+```
+
+Both scripts will:
+
+- Create a pattern optimized for resume parsing
+- Save the Pattern ID to `pattern_id.txt`
+- Display instructions for adding it to your `.env` file
+
+#### Add to your .env file
+
+```bash
+IMGGO_API_KEY=your_api_key_here
+RESUME_PATTERN_ID=pattern_id_from_script
+```
+
+### Step 2: Test the Pattern
+
+Test with a sample resume:
+
+```bash
+# Python
+python test-pattern.py
+
+# curl
+bash test-pattern.sh
+```
+
+Results will be saved to `outputs/resume1_output.txt`
+
+### Step 3: Integrate with Your System
+
+See the `integration-examples/` folder for production-ready integrations:
+
+- [Python ATS Integration](./integration-examples/python-example.py) - Full ATS workflow with scoring
+- [TypeScript/Node.js](./integration-examples/nodejs-example.ts) - Express.js webhook server
+
 ## What Gets Extracted
 
 ### JSON Output for ATS Integration

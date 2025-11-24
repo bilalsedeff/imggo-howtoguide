@@ -27,6 +27,60 @@ Automated shelf audit with image recognition:
 
 **Result**: 80% time reduction, real-time insights, 100% consistency.
 
+## Quick Start
+
+### Step 1: Create Your Pattern (One-Time Setup)
+
+Choose your preferred method to create the pattern:
+
+#### Option A: Using Python Script
+
+```bash
+cd use-cases/retail-shelf-audit
+python create-pattern.py
+```
+
+#### Option B: Using curl Script
+
+```bash
+cd use-cases/retail-shelf-audit
+bash create-pattern.sh
+```
+
+Both scripts will:
+
+- Create a pattern optimized for retail shelf audits
+- Save the Pattern ID to `pattern_id.txt`
+- Display instructions for adding it to your `.env` file
+
+#### Add to your .env file
+
+```bash
+IMGGO_API_KEY=your_api_key_here
+SHELF_AUDIT_PATTERN_ID=pattern_id_from_script
+```
+
+### Step 2: Test the Pattern
+
+Test with a sample shelf image:
+
+```bash
+# Python
+python test-pattern.py
+
+# curl
+bash test-pattern.sh
+```
+
+Results will be saved to `outputs/shelf_audit_output.json`
+
+### Step 3: Integrate with Your System
+
+See the `integration-examples/` folder for production-ready integrations:
+
+- [Python Database Integration](./integration-examples/python-example.py) - PostgreSQL analytics storage
+- [TypeScript/Node.js](./integration-examples/nodejs-example.ts) - Real-time API integration
+
 ## What Gets Extracted
 
 ### Shelf Audit Schema
