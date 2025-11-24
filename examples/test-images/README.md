@@ -70,7 +70,7 @@ For testing purposes, here are the expected test images:
 
 ## Privacy & Security
 
-⚠️ **Important Security Notes**:
+**Important Security Notes**:
 
 1. **This directory is .gitignored** - Test images are never committed to version control
 2. **Remove PII** - Strip all personally identifiable information before testing

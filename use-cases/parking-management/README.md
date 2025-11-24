@@ -36,6 +36,7 @@ python create-pattern.py
 ```
 
 Add to your `.env` file:
+
 ```bash
 IMGGO_API_KEY=your_api_key_here
 PARKING_PATTERN_ID=pattern_id_from_script

@@ -732,7 +732,7 @@ async function sendCriticalViolationAlert(moderation) {
 
   await slack.chat.postMessage({
     channel: '#trust-safety-alerts',
-    text: `🚨 Critical violation detected`,
+    text: `ALERT: Critical violation detected`,
     blocks: [
       {
         type: 'section',

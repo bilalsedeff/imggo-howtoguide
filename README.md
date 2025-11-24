@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="examples/public/white/logo.svg" alt="ImgGo Logo" width="200"/>
+</div>
+
 # Image-to-Structured Data Automation Guide
 
 A comprehensive guide for automating image processing workflows and extracting structured data from visual content at scale.
@@ -10,11 +14,11 @@ This repository provides practical, end-to-end solutions for automating image da
 
 ## What You'll Find Here
 
-- **📁 20+ Real-World Use Cases**: Invoice processing, retail audits, construction tracking, medical records, insurance claims, and more
-- **🔌 Complete Integration Guides**: n8n, Zapier, Make, Power Automate, and direct API implementations
-- **💾 Database Connectors**: PostgreSQL, Google Sheets, and more
-- **💻 Production-Ready Code**: Python, Node.js, cURL examples with error handling and best practices
-- **🔄 End-to-End Workflows**: From image upload to structured data storage
+- **20+ Real-World Use Cases**: Invoice processing, retail audits, construction tracking, medical records, insurance claims, and more
+- **Complete Integration Guides**: n8n, Zapier, Make, Power Automate, and direct API implementations
+- **Database Connectors**: PostgreSQL, Google Sheets, and more
+- **Production-Ready Code**: Python, Node.js, cURL examples with error handling and best practices
+- **End-to-End Workflows**: From image upload to structured data storage
 
 ## Repository Structure
 
@@ -41,7 +45,7 @@ This repository provides practical, end-to-end solutions for automating image da
 3. **Follow the Guide**: Each use case includes step-by-step instructions
 4. **Deploy & Scale**: Production-ready examples with webhooks and automation
 
-## 📚 Use Cases
+## Use Cases
 
 ### Finance & Accounting
 
@@ -89,7 +93,7 @@ This repository provides practical, end-to-end solutions for automating image da
 
 [View all 20 use cases →](./use-cases/)
 
-## 🔌 Integrations
+## Integrations
 
 ### Automation Platforms
 
@@ -109,7 +113,7 @@ Connect to production databases and storage systems:
 
 [View all integrations →](./integrations/)
 
-## 💻 Code Examples
+## Code Examples
 
 ### By Programming Language
 
@@ -128,7 +132,7 @@ Connect to production databases and storage systems:
 
 [View all examples →](./examples/)
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -144,7 +148,7 @@ Connect to production databases and storage systems:
 4. Choose a [Use Case](./use-cases) that matches your needs
 5. Deploy and scale
 
-## 📖 Documentation
+## Documentation
 
 Complete technical documentation:
 
@@ -155,7 +159,7 @@ Complete technical documentation:
 
 [View all documentation →](./docs/)
 
-## 📊 Output Format Examples
+## Output Format Examples
 
 ### Image to JSON
 
@@ -223,7 +227,7 @@ total_amount: 1942.92
 
 **Use cases**: [Construction Progress](./use-cases/construction-progress), [Inventory Management](./use-cases/inventory-management)
 
-## 🏗️ Architecture Pattern
+## Architecture Pattern
 
 All use cases follow this proven architecture:
 
@@ -238,7 +242,7 @@ Image Source → API Processing → Structured Output → Storage/Action
 3. **Structured Output**: Consistent JSON, YAML, XML, CSV, or text format
 4. **Integration**: Store in databases, trigger webhooks, or feed downstream systems
 
-## 📝 Example: Invoice Processing Pipeline
+## Example: Invoice Processing Pipeline
 
 A complete invoice processing workflow in 3 steps:
 
@@ -279,7 +283,7 @@ VALUES (result['vendor_name'], result['invoice_number'],
 
 **[See complete implementation →](./use-cases/invoice-processing)**
 
-## ✅ Best Practices
+## Best Practices
 
 - **Idempotency**: Use unique request IDs to prevent duplicate processing
 - **Webhooks**: Implement async processing for high-volume workflows
@@ -289,17 +293,17 @@ VALUES (result['vendor_name'], result['invoice_number'],
 - **Validation**: Always validate structured output before storage
 - **Monitoring**: Track success rates, latency, and error patterns
 
-## 🤝 Contributing
+## Contributing
 
 This is a living document. Use cases, examples, and integrations are continuously updated based on real-world implementations.
 
-## 📧 Support
+## Support
 
 - Review the [Documentation](./docs/) for detailed guides
 - Check [Integrations](./integrations/) for specific platform instructions
 - Explore [Use Cases](./use-cases/) for complete examples
 
-## 📄 License
+## License
 
 MIT License - See [LICENSE](./LICENSE) file for details
 

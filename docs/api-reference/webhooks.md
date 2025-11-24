@@ -250,8 +250,8 @@ def verify_webhook(payload, signature, secret):
 Configure webhook URLs with HTTPS to encrypt data in transit:
 
 ```plaintext
-✅ https://your-app.com/webhooks/imggo
-❌ http://your-app.com/webhooks/imggo
+CORRECT: https://your-app.com/webhooks/imggo
+INCORRECT: http://your-app.com/webhooks/imggo
 ```
 
 ### 3. Implement IP Whitelisting

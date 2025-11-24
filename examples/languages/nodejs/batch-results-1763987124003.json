@@ -1,0 +1,22 @@
+[
+  {
+    "imagePath": "../../test-images/invoice1.jpg",
+    "success": true,
+    "data": {
+      "invoice_number": "INV-10012",
+      "vendor": "Your Company",
+      "total_amount": 1699.48,
+      "date": "26/3/2021"
+    }
+  },
+  {
+    "imagePath": "../../test-images/invoice2.jpg",
+    "success": true,
+    "data": {
+      "invoice_number": "1930",
+      "vendor": "Vendor's company name",
+      "total_amount": 1839.2,
+      "date": "29 Jan 2024"
+    }
+  }
+]

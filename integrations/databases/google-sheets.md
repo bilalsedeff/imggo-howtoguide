@@ -549,11 +549,11 @@ def send_notification_on_new_invoice(invoice_data):
 ### Batch Operations
 
 ```python
-# ❌ Slow: Individual appends
+# SLOW: Individual appends
 for invoice in invoices:
     sheet.append_row([...])  # 100 API calls for 100 invoices
 
-# ✅ Fast: Batch append
+# FAST: Batch append
 rows = [[...] for invoice in invoices]
 sheet.append_rows(rows)  # 1 API call
 ```

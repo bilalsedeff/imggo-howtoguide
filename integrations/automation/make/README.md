@@ -243,7 +243,7 @@ Condition: confidence < 0.70
 [HTTP: Process with ImgGo]
     ↓ (on error)
 [Slack: Send Message]
-    "⚠️ Image processing failed: {{error.message}}"
+    "WARNING: Image processing failed: {{error.message}}"
     ↓
 [Tools: Resume]
 ```

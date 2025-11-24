@@ -27,6 +27,7 @@ curl -X GET https://img-go.com/api/patterns \
 ```
 
 Expected response:
+
 ```json
 {
   "success": true,
@@ -97,6 +98,7 @@ curl -X POST https://img-go.com/api/patterns \
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -123,6 +125,7 @@ curl -X POST https://img-go.com/api/patterns/pat_abc123xyz/ingest \
 ```
 
 **Response (202 Accepted)**:
+
 ```json
 {
   "success": true,
@@ -147,6 +150,7 @@ curl -X GET https://img-go.com/api/jobs/550e8400-e29b-41d4-a716-446655440000 \
 ```
 
 **Response (Job Completed)**:
+
 ```json
 {
   "success": true,
@@ -275,21 +279,25 @@ conn.close()
 ## Common Issues
 
 ### 401 Unauthorized
+
 - Verify your API key is correct
 - Check that the key hasn't expired
 - Ensure the `Authorization` header format is correct
 
 ### 422 Invalid Schema
+
 - Verify your pattern schema matches the instructions
 - Check that required fields are present
 - Ensure data types are correct (string, number, date, array)
 
 ### 429 Rate Limit Exceeded
+
 - You've exceeded your plan's request quota
 - Implement request throttling or upgrade your plan
 - Check rate limit headers in responses
 
 ### Job Stuck in "queued" Status
+
 - High volume periods may cause delays
 - Typical processing time: 10-30 seconds
 - If stuck >5 minutes, contact support

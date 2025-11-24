@@ -1,0 +1,1600 @@
+openapi: 3.1.0
+info:
+  title: ImgGo API
+  version: 1.0.0
+  description: Schema-conformant image analysis at scale. Transform images into structured data (JSON/YAML/XML/CSV/TEXT) with AI-powered pattern matching.
+  contact:
+    name: ImgGo Support
+    email: support@imggo.ai
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://api.imggo.ai
+    description: Production
+security:
+  - bearerAuth: []
+tags:
+  - name: Patterns
+    description: Pattern management and configuration
+  - name: Jobs
+    description: Image processing jobs and results
+  - name: API Keys
+    description: API key management
+  - name: Webhooks
+    description: Webhook configuration and management
+  - name: Storage
+    description: File upload and signed URLs
+  - name: System
+    description: Health checks and system status
+  - name: Demo
+    description: Public demo endpoints (no authentication required)
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: API key authentication using Bearer token
+  schemas:
+    Pattern:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        format:
+          type: string
+          enum:
+            - json
+            - yaml
+            - xml
+            - csv
+            - text
+        json_schema:
+          nullable: true
+        yaml_schema:
+          type: string
+          nullable: true
+        xml_schema:
+          type: string
+          nullable: true
+        csv_schema:
+          type: string
+          nullable: true
+        csv_delimiter:
+          type: string
+          enum:
+            - comma
+            - semicolon
+        plain_text_schema:
+          type: string
+          nullable: true
+        instructions:
+          type: string
+        model_profile:
+          type: string
+        version:
+          type: integer
+          minimum: 0
+          exclusiveMinimum: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        parent_pattern_id:
+          type: string
+          nullable: true
+          format: uuid
+      required:
+        - id
+        - user_id
+        - name
+        - format
+        - instructions
+        - model_profile
+        - version
+        - is_active
+        - created_at
+        - updated_at
+      description: Pattern entity representing an image analysis configuration
+      example:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        user_id: 660e8400-e29b-41d4-a716-446655440000
+        name: Product Extraction
+        format: json
+        json_schema:
+          type: object
+          properties:
+            product_name:
+              type: string
+            brand:
+              type: string
+            price:
+              type: number
+        instructions: Extract product details from images
+        model_profile: managed-default
+        version: 1
+        is_active: true
+        created_at: '2025-01-15T10:00:00Z'
+        updated_at: '2025-01-15T10:00:00Z'
+        parent_pattern_id: null
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pattern_id:
+          type: string
+          format: uuid
+        image_url:
+          type: string
+          format: uri
+        status:
+          type: string
+          enum:
+            - queued
+            - running
+            - succeeded
+            - failed
+        manifest:
+          type: object
+          nullable: true
+          additionalProperties:
+            nullable: true
+        error:
+          type: string
+          nullable: true
+        latency_ms:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          nullable: true
+          format: date-time
+        completed_at:
+          type: string
+          nullable: true
+          format: date-time
+        idempotency_key:
+          type: string
+          nullable: true
+        requested_by:
+          type: string
+          nullable: true
+          format: uuid
+        extras:
+          type: object
+          nullable: true
+          additionalProperties:
+            nullable: true
+      required:
+        - id
+        - pattern_id
+        - image_url
+        - status
+        - manifest
+        - error
+        - latency_ms
+        - created_at
+        - updated_at
+        - started_at
+        - completed_at
+        - idempotency_key
+        - requested_by
+        - extras
+      description: Job entity representing an image processing task
+      example:
+        id: 770e8400-e29b-41d4-a716-446655440000
+        pattern_id: 550e8400-e29b-41d4-a716-446655440000
+        image_url: https://storage.imggo.ai/uploads/product-image.jpg
+        status: succeeded
+        manifest:
+          product_name: Wireless Mouse
+          brand: Logitech
+          price: 29.99
+          in_stock: true
+        error: null
+        latency_ms: 1250
+        created_at: '2025-01-15T10:00:00Z'
+        updated_at: '2025-01-15T10:00:01.250Z'
+        started_at: '2025-01-15T10:00:00.100Z'
+        completed_at: '2025-01-15T10:00:01.250Z'
+        idempotency_key: unique-request-id-12345
+        requested_by: 660e8400-e29b-41d4-a716-446655440000
+        extras:
+          source: mobile-app
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum:
+            - false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties:
+                nullable: true
+          required:
+            - code
+            - message
+      required:
+        - success
+        - error
+      description: Standard error response format
+      example:
+        success: false
+        error:
+          code: INVALID_SCHEMA
+          message: The provided JSON schema is invalid
+          details:
+            field: json_schema
+            reason: Property keys cannot contain whitespace
+    CreatePatternRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ^[a-zA-Z0-9\s\-_()]+$
+        format:
+          type: string
+          enum:
+            - json
+            - yaml
+            - xml
+            - csv
+            - text
+        instructions:
+          type: string
+          maxLength: 2000
+        json_schema:
+          nullable: true
+        yaml_schema:
+          type: string
+          nullable: true
+          maxLength: 5000
+        xml_schema:
+          type: string
+          nullable: true
+          maxLength: 5000
+        csv_schema:
+          type: string
+          nullable: true
+          maxLength: 5000
+        csv_delimiter:
+          type: string
+          enum:
+            - comma
+            - semicolon
+          default: comma
+        plain_text_schema:
+          type: string
+          nullable: true
+          maxLength: 5000
+        model_profile:
+          type: string
+          minLength: 1
+          description: LLM/VLM provider profile
+        version:
+          type: integer
+          minimum: 0
+        is_active:
+          type: boolean
+        parent_pattern_id:
+          type: string
+          nullable: true
+          format: uuid
+      required:
+        - name
+        - instructions
+      description: Request body for creating a new pattern
+      example:
+        name: Product Extraction
+        format: json
+        instructions: Extract product name, brand, price, and availability from product images
+        json_schema:
+          type: object
+          properties:
+            product_name:
+              type: string
+            brand:
+              type: string
+            price:
+              type: number
+            in_stock:
+              type: boolean
+          required:
+            - product_name
+          additionalProperties: false
+        model_profile: managed-default
+    UpdatePatternRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ^[a-zA-Z0-9\s\-_()]+$
+        format:
+          type: string
+          enum:
+            - json
+            - yaml
+            - xml
+            - csv
+            - text
+        instructions:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        json_schema:
+          nullable: true
+        yaml_schema:
+          type: string
+          nullable: true
+          maxLength: 5000
+        xml_schema:
+          type: string
+          nullable: true
+          maxLength: 5000
+        csv_schema:
+          type: string
+          nullable: true
+          maxLength: 5000
+        csv_delimiter:
+          type: string
+          enum:
+            - comma
+            - semicolon
+        plain_text_schema:
+          type: string
+          maxLength: 5000
+        is_active:
+          type: boolean
+        publish_new_version:
+          type: boolean
+          default: false
+      description: Request body for updating an existing pattern
+      example:
+        name: Updated Product Extraction
+        instructions: Extract product name, brand, price, stock status, and product condition
+        is_active: true
+    IngestResponse:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - queued
+        message:
+          type: string
+      required:
+        - job_id
+        - status
+        - message
+      example:
+        job_id: 770e8400-e29b-41d4-a716-446655440000
+        status: queued
+        message: Image queued for processing
+    IngestRequest:
+      type: object
+      properties:
+        image_url:
+          type: string
+          format: uri
+        extras:
+          type: object
+          additionalProperties:
+            nullable: true
+        idempotency_key:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,255}$
+      required:
+        - image_url
+      description: Request body for submitting an image for processing
+      example:
+        image_url: https://storage.imggo.ai/uploads/product-image.jpg
+        extras:
+          source: mobile-app
+          user_id: usr_123
+        idempotency_key: unique-request-id-12345
+    ApiKeyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        key:
+          type: string
+        key_type:
+          type: string
+          enum:
+            - test
+            - live
+        scopes:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+        - id
+        - name
+        - key
+        - key_type
+        - scopes
+        - created_at
+        - expires_at
+      description: API key with secret included (only shown once)
+      example:
+        id: 880e8400-e29b-41d4-a716-446655440000
+        name: Production Server Key
+        key: imggo_live_abc123xyz789...
+        key_type: live
+        scopes:
+          - patterns:read
+          - patterns:ingest
+          - jobs:read
+        created_at: '2025-01-15T10:00:00Z'
+        expires_at: '2026-12-31T23:59:59Z'
+    ApiKeyCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        scopes:
+          type: array
+          items:
+            type: string
+          default:
+            - patterns:read
+            - patterns:ingest
+        expires_at:
+          type: string
+          format: date-time
+      required:
+        - name
+      description: Request body for creating a new API key
+      example:
+        name: Production Server Key
+        scopes:
+          - patterns:read
+          - patterns:ingest
+          - jobs:read
+        expires_at: '2026-12-31T23:59:59Z'
+    ApiKeyListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        key_prefix:
+          type: string
+        key_type:
+          type: string
+          enum:
+            - test
+            - live
+        scopes:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          nullable: true
+          format: date-time
+        last_used_at:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+        - id
+        - name
+        - key_prefix
+        - key_type
+        - scopes
+        - created_at
+        - expires_at
+        - last_used_at
+      description: API key list item (secret not included)
+      example:
+        id: 880e8400-e29b-41d4-a716-446655440000
+        name: Production Server Key
+        key_prefix: imggo_live_abc123
+        key_type: live
+        scopes:
+          - patterns:read
+          - patterns:ingest
+        created_at: '2025-01-15T10:00:00Z'
+        expires_at: '2026-12-31T23:59:59Z'
+        last_used_at: '2025-01-20T14:30:00Z'
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        secret:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        last_triggered_at:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+        - id
+        - user_id
+        - url
+        - events
+        - secret
+        - is_active
+        - created_at
+        - updated_at
+        - last_triggered_at
+      description: Webhook configuration
+      example:
+        id: 990e8400-e29b-41d4-a716-446655440000
+        user_id: 660e8400-e29b-41d4-a716-446655440000
+        url: https://your-server.com/webhooks/imggo
+        events:
+          - job.succeeded
+          - job.failed
+        secret: whsec_abc123xyz789...
+        is_active: true
+        created_at: '2025-01-15T10:00:00Z'
+        updated_at: '2025-01-15T10:00:00Z'
+        last_triggered_at: '2025-01-20T14:30:00Z'
+    WebhookCreateRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+              - job.succeeded
+              - job.failed
+          minItems: 1
+          default:
+            - job.succeeded
+            - job.failed
+        secret:
+          type: string
+          minLength: 16
+      required:
+        - url
+      description: Request body for creating a new webhook
+      example:
+        url: https://your-server.com/webhooks/imggo
+        events:
+          - job.succeeded
+          - job.failed
+        secret: your-webhook-secret-key-min-16-chars
+    SignedUploadResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        token:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        upload_path:
+          type: string
+      required:
+        - url
+        - token
+        - expires_at
+        - upload_path
+      description: Signed upload URL with token and expiration
+      example:
+        url: https://storage.imggo.ai/upload/signed-url-here
+        token: upload_token_abc123xyz789
+        expires_at: '2025-01-15T11:00:00Z'
+        upload_path: uploads/user-123/image-456.jpg
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+        timestamp:
+          type: string
+          format: date-time
+        services:
+          type: object
+          properties:
+            database:
+              type: string
+              enum:
+                - up
+                - down
+            storage:
+              type: string
+              enum:
+                - up
+                - down
+            queue:
+              type: string
+              enum:
+                - up
+                - down
+          required:
+            - database
+            - storage
+            - queue
+      required:
+        - status
+        - timestamp
+        - services
+      description: System health status
+      example:
+        status: healthy
+        timestamp: '2025-01-15T10:00:00Z'
+        services:
+          database: up
+          storage: up
+          queue: up
+    DemoProcessResponse:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - queued
+        message:
+          type: string
+        demo_expires_at:
+          type: string
+          format: date-time
+      required:
+        - job_id
+        - status
+        - message
+        - demo_expires_at
+      example:
+        job_id: 770e8400-e29b-41d4-a716-446655440000
+        status: queued
+        message: Demo image queued for processing
+        demo_expires_at: '2025-01-15T11:00:00Z'
+    DemoProcessRequest:
+      type: object
+      properties:
+        image_url:
+          type: string
+          format: uri
+        pattern_type:
+          type: string
+          enum:
+            - product
+            - receipt
+            - document
+      required:
+        - image_url
+      example:
+        image_url: https://example.com/demo-image.jpg
+        pattern_type: product
+  parameters: {}
+paths:
+  /api/patterns:
+    post:
+      summary: Create a new pattern
+      description: Create a new image analysis pattern with custom instructions and schema
+      tags:
+        - Patterns
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePatternRequest'
+      responses:
+        '201':
+          description: Pattern created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/Pattern'
+                required:
+                  - success
+                  - data
+        '400':
+          description: Invalid request body or schema validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions or plan limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List all patterns
+      description: Retrieve a paginated list of patterns for the authenticated user
+      tags:
+        - Patterns
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: true
+            default: 1
+            description: Page number for pagination
+            example: 1
+          required: false
+          name: page
+          in: query
+        - schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: true
+            maximum: 100
+            default: 20
+            description: Items per page (max 100)
+            example: 20
+          required: false
+          name: per_page
+          in: query
+        - schema:
+            type: string
+            enum:
+              - 'true'
+              - 'false'
+            description: Filter by active status
+            example: 'true'
+          required: false
+          name: is_active
+          in: query
+      responses:
+        '200':
+          description: Patterns retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Pattern'
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                          per_page:
+                            type: integer
+                          total:
+                            type: integer
+                          total_pages:
+                            type: integer
+                        required:
+                          - page
+                          - per_page
+                          - total
+                          - total_pages
+                    required:
+                      - data
+                      - pagination
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/patterns/{id}:
+    get:
+      summary: Get a specific pattern
+      description: Retrieve details of a specific pattern by ID
+      tags:
+        - Patterns
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: Pattern ID
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        '200':
+          description: Pattern retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/Pattern'
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Pattern not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Update a pattern
+      description: Update an existing pattern's configuration
+      tags:
+        - Patterns
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: Pattern ID
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePatternRequest'
+      responses:
+        '200':
+          description: Pattern updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/Pattern'
+                required:
+                  - success
+                  - data
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Pattern not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a pattern
+      description: 'Soft delete a pattern. Note: Can only be done via dashboard UI, not via API'
+      tags:
+        - Patterns
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: Pattern ID
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        '200':
+          description: Pattern deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Pattern deletion via API not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Pattern not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/patterns/{id}/ingest:
+    post:
+      summary: Submit image for processing
+      description: Queue an image for analysis using the specified pattern
+      tags:
+        - Jobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: Pattern ID
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+        - schema:
+            type: string
+            description: Optional idempotency key to prevent duplicate processing
+            example: unique-request-id-12345
+          required: false
+          name: Idempotency-Key
+          in: header
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+      responses:
+        '202':
+          description: Image queued for processing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/IngestResponse'
+                required:
+                  - success
+                  - data
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions or rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Pattern not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/jobs/{id}:
+    get:
+      summary: Get job status and results
+      description: Retrieve the current status and results of a processing job
+      tags:
+        - Jobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: Job ID
+            example: 770e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        '200':
+          description: Job retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/Job'
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/api-keys:
+    post:
+      summary: Create a new API key
+      description: Generate a new API key with specified scopes and expiration
+      tags:
+        - API Keys
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyCreateRequest'
+      responses:
+        '201':
+          description: API key created successfully. Save the key now - it won't be shown again!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/ApiKeyResponse'
+                required:
+                  - success
+                  - data
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Plan limit exceeded (max API keys reached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List all API keys
+      description: Retrieve all API keys for the authenticated user (secrets not included)
+      tags:
+        - API Keys
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: API keys retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApiKeyListItem'
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/api-keys/{id}:
+    delete:
+      summary: Delete an API key
+      description: Permanently revoke an API key
+      tags:
+        - API Keys
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: API key ID
+            example: 880e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        '200':
+          description: API key deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: API key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/webhooks:
+    post:
+      summary: Create a new webhook
+      description: Register a webhook URL to receive notifications when jobs complete
+      tags:
+        - Webhooks
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookCreateRequest'
+      responses:
+        '201':
+          description: Webhook created successfully. Save the secret for signature verification!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/Webhook'
+                required:
+                  - success
+                  - data
+        '400':
+          description: Invalid request body or webhook URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Plan limit exceeded (max webhooks reached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List all webhooks
+      description: Retrieve all registered webhooks for the authenticated user
+      tags:
+        - Webhooks
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Webhooks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/webhooks/{id}:
+    delete:
+      summary: Delete a webhook
+      description: Remove a webhook configuration
+      tags:
+        - Webhooks
+      security:
+        - bearerAuth: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: Webhook ID
+            example: 990e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        '200':
+          description: Webhook deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - success
+                  - data
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Webhook not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/uploads/signed-url:
+    post:
+      summary: Create signed upload URL
+      description: Generate a signed URL for direct image upload to storage
+      tags:
+        - Storage
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  minLength: 1
+                  pattern: ^[a-zA-Z0-9/_\-\.]+$
+                  description: File path in storage bucket
+                content_type:
+                  type: string
+                  default: image/jpeg
+              required:
+                - path
+      responses:
+        '200':
+          description: Signed URL created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/SignedUploadResponse'
+                required:
+                  - success
+                  - data
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/_health:
+    get:
+      summary: Health check
+      description: Check the health status of the ImgGo API and its dependencies
+      tags:
+        - System
+      security: []
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: System is degraded or unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/demo/process:
+    post:
+      summary: Process demo image (public)
+      description: Try ImgGo with a demo image without authentication. Limited to 3 requests per hour.
+      tags:
+        - Demo
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemoProcessRequest'
+      responses:
+        '202':
+          description: Demo image queued successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: '#/components/schemas/DemoProcessResponse'
+                required:
+                  - success
+                  - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Demo rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/demo/status/{job_id}:
+    get:
+      summary: Get demo job status (public)
+      description: Check the status of a demo processing job
+      tags:
+        - Demo
+      security: []
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: Demo job ID
+            example: 770e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: job_id
+          in: path
+      responses:
+        '200':
+          description: Demo job status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    properties:
+                      job_id:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        enum:
+                          - queued
+                          - running
+                          - succeeded
+                          - failed
+                      manifest:
+                        type: object
+                        nullable: true
+                        additionalProperties:
+                          nullable: true
+                      error:
+                        type: string
+                        nullable: true
+                    required:
+                      - job_id
+                      - status
+                      - manifest
+                      - error
+                required:
+                  - success
+                  - data
+        '404':
+          description: Demo job not found or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -34,6 +34,7 @@ Perfect for teams that need:
 ### 1. Install n8n
 
 **Option A: Docker** (recommended):
+
 ```bash
 docker run -it --rm \
   --name n8n \
@@ -43,6 +44,7 @@ docker run -it --rm \
 ```
 
 **Option B: npm**:
+
 ```bash
 npm install n8n -g
 n8n start
@@ -68,6 +70,7 @@ Access n8n at `http://localhost:5678`
 Process invoice attachments from Gmail and store in PostgreSQL.
 
 **Nodes**:
+
 1. **Gmail Trigger** - Watch for new emails with attachments
 2. **Filter** - Only emails with "invoice" in subject
 3. **HTTP Request** - Upload image to ImgGo
@@ -76,6 +79,7 @@ Process invoice attachments from Gmail and store in PostgreSQL.
 6. **PostgreSQL** - Insert extracted data
 
 **Visual Flow**:
+
 ```
 [Gmail Trigger] → [Filter] → [HTTP: Upload] → [Wait] → [HTTP: Get Result] → [PostgreSQL]
 ```
@@ -147,12 +151,14 @@ Columns:
 Monitor Dropbox folder for new shelf photos, extract product data, append to Google Sheets.
 
 **Nodes**:
+
 1. **Dropbox Trigger** - Watch folder for new files
 2. **HTTP Request** - Process with ImgGo
 3. **Code** - Poll for completion
 4. **Google Sheets** - Append product data
 
 **Visual Flow**:
+
 ```
 [Dropbox Trigger] → [HTTP: Process] → [Code: Poll] → [Google Sheets: Append]
 ```
@@ -234,6 +240,7 @@ Columns:
 Receive webhook, process image, send results to multiple destinations.
 
 **Nodes**:
+
 1. **Webhook** - Receive image submission
 2. **HTTP Request** - Process with ImgGo
 3. **Wait** - Allow processing time
@@ -245,6 +252,7 @@ Receive webhook, process image, send results to multiple destinations.
 9. **Google Sheets** - Append to sheet
 
 **Visual Flow**:
+
 ```
 [Webhook] → [HTTP: Process] → [Wait] → [HTTP: Get] → [Split] → [PostgreSQL]
                                                              → [Slack]
@@ -274,7 +282,7 @@ const error = $input.first().json;
 await $http.post({
   url: process.env.SLACK_WEBHOOK_URL,
   json: {
-    text: `⚠️ Workflow Error: ${error.message}`,
+    text: `WARNING: Workflow Error: ${error.message}`,
     attachments: [{
       fields: [
         { title: 'Node', value: error.node },
@@ -452,9 +460,9 @@ return { json: result };
 
 ```
 Settings > General:
-  ✅ Save execution progress
-  ✅ Save manual executions
-  ✅ Save error executions
+  [x] Save execution progress
+  [x] Save manual executions
+  [x] Save error executions
 ```
 
 ### View Execution Data
@@ -524,6 +532,7 @@ return { json: { result_id: resultId } };
 ---
 
 **Sources**:
+
 - [n8n Official Documentation](https://docs.n8n.io/)
 - [Mastering AI Image Automation with n8n](https://n8n-automation.com/2024/09/25/top-10-ai-image-automations/)
 - [n8n Workflow Templates](https://n8n.io/workflows/)

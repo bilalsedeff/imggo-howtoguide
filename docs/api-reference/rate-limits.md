@@ -454,7 +454,7 @@ def generate_usage_report():
     Monthly Limit: {monthly_limit}
     Current Usage: {usage_percent:.1f}%
     Projected Monthly: {projected_usage:.0f} requests
-    Status: {'⚠️ On track to exceed' if projected_usage > monthly_limit else '✅ Within limits'}
+    Status: {'WARNING: On track to exceed' if projected_usage > monthly_limit else 'OK: Within limits'}
     """
 
     send_email_report(report)
