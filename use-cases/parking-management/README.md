@@ -31,7 +31,7 @@ ImgGo extracts license plate data, vehicle attributes, and parking metadata from
 
 **Workflow**:
 
-```
+```plaintext
 Parking Camera → Cloud Storage/Stream → ImgGo API (URL) → XML Output → Parking Management System
 ```
 

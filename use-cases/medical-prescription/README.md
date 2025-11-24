@@ -52,7 +52,7 @@ Special Instructions: Complete full course even if symptoms improve.
 May cause drowsiness. Avoid alcohol.
 ```
 
-### Structured JSON Output
+### Structured JSON Output-1
 
 For direct integration with pharmacy systems:
 
@@ -99,7 +99,7 @@ curl -X POST https://img-go.com/api/patterns \
   }'
 ```
 
-### Structured JSON Output
+### Structured JSON Output-2
 
 ```bash
 curl -X POST https://img-go.com/api/patterns \
@@ -524,7 +524,7 @@ Complete examples in `integration-examples/`:
 
 ### Pharmacy Workflow
 
-```
+```plaintext
 1. Patient drops off prescription (photo or paper)
 2. Technician scans/photographs prescription
 3. System extracts data automatically
@@ -583,6 +583,7 @@ def telemedicine_prescription():
 ### Issue: Handwriting Not Recognized
 
 **Solutions**:
+
 - Request clearer image (better lighting, focus)
 - Ask prescriber to print prescriptions
 - Flag for manual review if confidence < 85%
@@ -590,13 +591,15 @@ def telemedicine_prescription():
 ### Issue: Missing DEA Number
 
 **Solution**: Pattern instructions:
-```
+
+```plaintext
 "Extract DEA number if present. For controlled substances, flag if DEA number is missing or illegible."
 ```
 
 ### Issue: Ambiguous Dosage
 
 **Solution**: Implement pharmacist verification:
+
 ```python
 if result.get('confidence', 100) < 90:
     flag_for_pharmacist_review(prescription_id, "Low confidence on dosage")
@@ -613,5 +616,6 @@ if result.get('confidence', 100) < 90:
 **SEO Keywords**: prescription image to text, handwritten prescription OCR, pharmacy automation, prescription digitization, medical OCR, rx image processing
 
 **Sources**:
+
 - [Prescription OCR Guide](https://www.v7labs.com/blog/prescription-reader-ocr-complete-guide-to-healthcare-document-automation)
 - [Medical Prescription Automation](https://www.affinda.com/documents/medical-prescription)

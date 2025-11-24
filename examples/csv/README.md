@@ -5,6 +5,7 @@ Complete working examples for converting images to CSV using ImgGo API.
 ## What is CSV Output?
 
 CSV (Comma-Separated Values) is ideal for:
+
 - Spreadsheet imports (Excel, Google Sheets)
 - Database bulk imports
 - Data analysis tools (pandas, R)
@@ -14,11 +15,13 @@ CSV (Comma-Separated Values) is ideal for:
 ## Examples Included
 
 ### 1. Inventory to CSV
+
 Extract inventory counts from warehouse photos.
 
 **Use case**: Cycle counting, stock management
 
 **Output example**:
+
 ```csv
 sku,product_name,quantity,location,condition
 SKU-001,Widget Pro,150,A-12-3,Good
@@ -26,11 +29,13 @@ SKU-002,Gadget Plus,75,B-05-1,Good
 ```
 
 ### 2. Inspection Reports to CSV
+
 Convert inspection checklists to tabular data.
 
 **Use case**: Quality control, compliance reporting
 
 **Output example**:
+
 ```csv
 inspection_id,item,status,notes,inspector
 INS-001,Fire Extinguisher,Pass,Fully charged,John Doe
@@ -38,11 +43,13 @@ INS-001,Exit Sign,Fail,Light not working,John Doe
 ```
 
 ### 3. Expense Receipts Batch
+
 Process multiple receipts into expense report.
 
 **Use case**: Expense management, accounting
 
 **Output example**:
+
 ```csv
 date,merchant,category,amount,payment_method
 2025-01-15,Office Depot,Supplies,45.99,Corporate Card
@@ -50,6 +57,7 @@ date,merchant,category,amount,payment_method
 ```
 
 ### 4. CSV to Database Import
+
 Direct import of CSV results into SQLite/PostgreSQL.
 
 **Use case**: Data warehousing, reporting
@@ -101,7 +109,8 @@ Create CSV patterns at [img-go.com/patterns](https://img-go.com/patterns):
 4. Publish and copy Pattern ID
 
 **Example instructions**:
-```
+
+```plaintext
 Extract inventory data with these columns:
 - sku: Stock keeping unit
 - product_name: Product description
@@ -306,4 +315,4 @@ print(f"Total rows: {len(combined_df)}")
 
 - [ImgGo API Documentation](https://img-go.com/docs)
 - [CSV Format Guide](https://img-go.com/docs/output-formats/csv)
-- Email: support@img-go.com
+- Email: <support@img-go.com>

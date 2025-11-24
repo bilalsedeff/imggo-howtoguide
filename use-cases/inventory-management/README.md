@@ -30,11 +30,13 @@ Traditional cycle counting requires staff with clipboards or barcode scanners wa
 ImgGo extracts product counts, SKUs, and location data from shelf photos and outputs **CSV files** that directly import into inventory management systems:
 
 **Workflow**:
-```
+
+```plaintext
 Warehouse Photo (URL) → ImgGo API → CSV Output → ERP/WMS Import
 ```
 
 **What Gets Extracted**:
+
 - Product SKUs and descriptions
 - Quantities on shelf
 - Location (aisle, bin, shelf)
@@ -57,6 +59,7 @@ CSV is the universal format for inventory data:
 - **No Transformation**: Direct mapping to inventory system fields
 
 **Example Output (inventory_count_2025-01-22.csv)**:
+
 ```csv
 Location,SKU,Product_Description,Quantity_Counted,Unit_Price,Total_Value,Condition,Expiration_Date,Last_Updated,Count_Confidence
 A-12-3,SKU-100234,Premium Coffee Beans 1lb,47,12.99,610.53,Good,,2025-01-22T14:30:00Z,0.98
@@ -771,4 +774,4 @@ def predict_reorder_points(historical_counts_csv):
 - API Documentation: [https://img-go.com/docs](https://img-go.com/docs)
 - CSV Output Guide: [https://img-go.com/docs/output-formats#csv](https://img-go.com/docs/output-formats#csv)
 - Inventory Best Practices: [https://img-go.com/docs/inventory-counting](https://img-go.com/docs/inventory-counting)
-- Integration Help: support@img-go.com
+- Integration Help: <support@img-go.com>

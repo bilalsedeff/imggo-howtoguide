@@ -19,7 +19,7 @@ def example_invoice_to_json():
     Example 1: Extract invoice data as JSON
     """
     print("\n" + "="*60)
-    print("EXAMPLE 1: Invoice Image → JSON")
+    print("EXAMPLE 1: Invoice Image -> JSON")
     print("="*60)
 
     client = ImgGoClient()
@@ -48,10 +48,10 @@ def example_invoice_to_json():
         with open(output_file, 'w') as f:
             json.dump(result, f, indent=2)
 
-        print(f"\n✓ Saved to {output_file}")
+        print(f"\nV Saved to {output_file}")
 
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        print(f"\nX Error: {e}")
 
 
 def example_document_classification_to_json():
@@ -59,7 +59,7 @@ def example_document_classification_to_json():
     Example 2: Classify documents and extract metadata as JSON
     """
     print("\n" + "="*60)
-    print("EXAMPLE 2: Document Classification → JSON")
+    print("EXAMPLE 2: Document Classification -> JSON")
     print("="*60)
 
     client = ImgGoClient()
@@ -86,7 +86,7 @@ def example_document_classification_to_json():
             result = json.loads(result)
 
         doc_type = result.get('document_type', 'unknown')
-        print(f"\n→ Document Type: {doc_type}")
+        print(f"\n-> Document Type: {doc_type}")
 
         if doc_type == 'invoice':
             print("  Routing to: Accounts Payable")
@@ -96,7 +96,7 @@ def example_document_classification_to_json():
             print("  Routing to: Expense Management")
 
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        print(f"\nX Error: {e}")
 
 
 def example_product_catalog_to_json():
@@ -104,7 +104,7 @@ def example_product_catalog_to_json():
     Example 3: Extract product details from images as JSON
     """
     print("\n" + "="*60)
-    print("EXAMPLE 3: Product Image → JSON Catalog Entry")
+    print("EXAMPLE 3: Product Image -> JSON Catalog Entry")
     print("="*60)
 
     client = ImgGoClient()
@@ -132,10 +132,10 @@ def example_product_catalog_to_json():
         with open(output_file, 'w') as f:
             json.dump(result, f, indent=2)
 
-        print(f"\n✓ Saved to {output_file}")
+        print(f"\nV Saved to {output_file}")
 
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        print(f"\nX Error: {e}")
 
 
 def example_batch_processing():
@@ -143,7 +143,7 @@ def example_batch_processing():
     Example 4: Batch process multiple images to JSON
     """
     print("\n" + "="*60)
-    print("EXAMPLE 4: Batch Processing → Multiple JSON Files")
+    print("EXAMPLE 4: Batch Processing -> Multiple JSON Files")
     print("="*60)
 
     client = ImgGoClient()
@@ -171,7 +171,7 @@ def example_batch_processing():
                 "status": "success"
             })
 
-            print("✓")
+            print("V")
 
         except Exception as e:
             results.append({
@@ -179,14 +179,14 @@ def example_batch_processing():
                 "error": str(e),
                 "status": "failed"
             })
-            print(f"✗ ({e})")
+            print(f"X ({e})")
 
     # Save batch results
     batch_output = "batch_results.json"
     with open(batch_output, 'w') as f:
         json.dump(results, f, indent=2)
 
-    print(f"\n✓ Batch results saved to {batch_output}")
+    print(f"\nV Batch results saved to {batch_output}")
 
     # Summary
     successful = sum(1 for r in results if r['status'] == 'success')
@@ -204,7 +204,7 @@ def main():
 
     # Check API key
     if not os.getenv("IMGGO_API_KEY"):
-        print("\n✗ Error: IMGGO_API_KEY environment variable not set")
+        print("\nX Error: IMGGO_API_KEY environment variable not set")
         print("  Set it in .env file or export IMGGO_API_KEY=your_key")
         return
 
@@ -222,7 +222,7 @@ def main():
     except KeyboardInterrupt:
         print("\n\nExamples interrupted by user")
     except Exception as e:
-        print(f"\n\n✗ Fatal error: {e}")
+        print(f"\n\nX Fatal error: {e}")
         raise
 
 

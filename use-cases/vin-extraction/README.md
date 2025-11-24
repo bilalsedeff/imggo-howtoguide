@@ -476,7 +476,7 @@ def sync_to_dealertrack(vehicle_data):
 
 ### Auto Dealership Inventory
 
-```
+```plaintext
 1. Trade-in arrives at dealership
 2. Technician photographs VIN plate
 3. Image auto-uploads to S3
@@ -545,6 +545,7 @@ Complete examples in `integration-examples/`:
 ### Issue: VIN Not Recognized
 
 **Solutions**:
+
 - Ensure good lighting (avoid glare on metal plate)
 - Capture from multiple angles if needed
 - Clean VIN plate before photographing
@@ -552,6 +553,7 @@ Complete examples in `integration-examples/`:
 ### Issue: Invalid Check Digit
 
 **Solution**: Review VIN extraction, common OCR errors:
+
 - 0 vs O
 - 1 vs I
 - 5 vs S
@@ -592,5 +594,6 @@ def validate_vin_xml(xml_string):
 **SEO Keywords**: VIN extraction API, vehicle identification number OCR, image to XML conversion, automotive VIN decoder, fleet VIN scanning
 
 **Sources**:
+
 - [VIN Extraction Use Cases](https://www.eleader.biz/shelf-recognition/)
 - [Automotive OCR](https://www.klippa.com/)

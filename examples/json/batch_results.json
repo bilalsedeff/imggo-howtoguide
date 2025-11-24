@@ -1,0 +1,17 @@
+[
+  {
+    "filename": "invoice1.jpg",
+    "error": "500 Server Error: Internal Server Error for url: https://img-go.com/api/patterns/pat_invoice_json/ingest",
+    "status": "failed"
+  },
+  {
+    "filename": "invoice2.jpg",
+    "error": "500 Server Error: Internal Server Error for url: https://img-go.com/api/patterns/pat_invoice_json/ingest",
+    "status": "failed"
+  },
+  {
+    "filename": "invoice3.jpg",
+    "error": "500 Server Error: Internal Server Error for url: https://img-go.com/api/patterns/pat_invoice_json/ingest",
+    "status": "failed"
+  }
+]

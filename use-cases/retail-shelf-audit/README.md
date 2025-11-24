@@ -99,7 +99,7 @@ curl -X POST https://img-go.com/api/patterns \
 
 ### Architecture
 
-```
+```plaintext
 Mobile App (React Native) → ImgGo API → PostgreSQL → Power BI Dashboard
                              ↓
                      Real-time Alerts (Twilio SMS)
@@ -486,11 +486,13 @@ def compare_to_planogram(audit_data, planogram):
 ### Issue: Products Not Detected
 
 **Causes**:
+
 - Poor lighting or image quality
 - Products too far from camera
 - Obscured labels
 
 **Solutions**:
+
 - Use good lighting (avoid glare)
 - Capture from 3-5 feet distance
 - Take multiple angles if needed
@@ -500,7 +502,7 @@ def compare_to_planogram(audit_data, planogram):
 
 **Solution**: Add specific counting instructions:
 
-```
+```plaintext
 Count the number of visible product facings (individual units visible from the front). If products are stacked, count only the front-facing row. For multi-packs, count each multi-pack as one facing.
 ```
 
