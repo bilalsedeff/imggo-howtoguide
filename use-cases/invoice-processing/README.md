@@ -64,50 +64,59 @@ Automated invoice processing with image-to-structured data extraction:
 }
 ```
 
-## Pattern Setup
+## Quick Start
 
-### Create Pattern (One-Time)
+### Step 1: Create Your Pattern (One-Time Setup)
+
+Choose your preferred method to create the pattern:
+
+#### Option A: Using Python Script
 
 ```bash
-curl -X POST https://img-go.com/api/patterns \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Invoice Data Extractor - Production",
-    "output_format": "json",
-    "instructions": "Extract all invoice details including vendor information (name, address, tax ID, contact details), invoice metadata (number, PO number, dates, payment terms), line items with descriptions, quantities, unit prices, amounts, and tax rates, and totals (subtotal, tax, discount, shipping, grand total). Extract currency code. If any field is not visible, return null for that field.",
-    "schema": {
-      "vendor": {
-        "name": "string",
-        "address": "string",
-        "tax_id": "string",
-        "contact_email": "email",
-        "contact_phone": "phone"
-      },
-      "invoice_number": "string",
-      "po_number": "string",
-      "invoice_date": "date",
-      "due_date": "date",
-      "line_items": [
-        {
-          "line_number": "number",
-          "description": "string",
-          "quantity": "number",
-          "unit_price": "number",
-          "amount": "number",
-          "tax_rate": "number"
-        }
-      ],
-      "subtotal": "number",
-      "tax_total": "number",
-      "discount": "number",
-      "shipping": "number",
-      "total_amount": "number",
-      "currency": "string",
-      "payment_terms": "string"
-    }
-  }'
+cd integration-examples
+python create-pattern.py
 ```
+
+#### Option B: Using curl Script
+
+```bash
+cd integration-examples
+bash create-pattern.sh
+```
+
+Both scripts will:
+
+- Create a pattern optimized for invoice processing
+- Save the Pattern ID to `pattern_id.txt`
+- Display instructions for adding it to your `.env` file
+
+#### Add to your .env file
+
+```bash
+IMGGO_API_KEY=your_api_key_here
+INVOICE_PATTERN_ID=pattern_id_from_script
+```
+
+### Step 2: Run Integration Examples
+
+Test with the provided integration examples:
+
+```bash
+# Python
+cd integration-examples
+python python-example.py
+
+# TypeScript/Node.js
+cd integration-examples
+npm install
+npx ts-node nodejs-example.ts
+
+# curl
+cd integration-examples
+bash curl-example.sh
+```
+
+Results will be saved to `integration-examples/outputs/`
 
 ## End-to-End Workflows
 
