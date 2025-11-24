@@ -69,9 +69,12 @@ class ImgGoClient:
             idempotency_key = f"{Path(image_path).stem}-{int(time.time())}"
 
         # Upload image
+        import mimetypes
         filename = Path(image_path).name
+        mime_type, _ = mimetypes.guess_type(image_path)
+
         with open(image_path, 'rb') as f:
-            files = {'image': (filename, f, 'image/jpeg')}
+            files = {'image': (filename, f, mime_type or 'image/jpeg')}
             data = {}
 
             if webhook_url:

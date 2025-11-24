@@ -27,8 +27,9 @@ interface JobStatusResponse {
   success: boolean;
   data: {
     job_id: string;
-    status: 'queued' | 'processing' | 'completed' | 'failed';
+    status: 'queued' | 'processing' | 'completed' | 'succeeded' | 'failed';
     result?: string;  // CSV string
+    manifest?: any;  // CSV or structured data
     error?: string;
   };
 }

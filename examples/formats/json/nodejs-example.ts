@@ -30,8 +30,9 @@ interface JobStatusResponse {
   success: boolean;
   data: {
     job_id: string;
-    status: 'queued' | 'processing' | 'completed' | 'failed';
+    status: 'queued' | 'processing' | 'completed' | 'succeeded' | 'failed';
     result?: InvoiceData;
+    manifest?: InvoiceData;
     error?: string;
   };
 }
