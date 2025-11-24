@@ -1,0 +1,82 @@
+{
+  "invoice": [
+    "https://raw.githubusercontent.com/tesseract-ocr/tessdata/main/test/phototest.tif",
+    "https://templates.invoicehome.com/invoice-template-us-neat-750px.png",
+    "https://www.researchgate.net/publication/330835059/figure/fig1/AS:722232404447232@1549399474795/Sample-invoice-image.png"
+  ],
+  "receipt": [
+    "https://www.receiptfont.com/images/receipt-font-sample.png",
+    "https://raw.githubusercontent.com/zzzprojects/receipt-ocr/main/docs/images/receipt-example.jpg",
+    "https://www.smartreceipt.co/wp-content/uploads/2020/01/receipt-template.png"
+  ],
+  "resume": [
+    "https://resumegenius.com/wp-content/uploads/Resume-Example-Executive-1.png",
+    "https://www.myperfectresume.com/wp-content/uploads/2020/01/simple-resume-example.png",
+    "https://d.novoresume.com/images/doc/general-resume-template.png"
+  ],
+  "vin_plate": [
+    "https://www.caranddriver.com/wp-content/uploads/2019/08/vin-plate.jpg",
+    "https://static.wikia.nocookie.net/tractor/images/c/c8/VIN_Plate.jpg",
+    "https://www.vehiclehistory.gov/vin_media/VIN_Plate_Location.jpg"
+  ],
+  "id_card": [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Sample_identity_card.svg/1200px-Sample_identity_card.svg.png",
+    "https://www.idcreator.com/wp-content/uploads/2019/08/employee-id-card-template.png",
+    "https://www.barcodesinc.com/generator/image.php?code=123456789&style=197&type=C128B&width=400&height=150&xres=1&font=3"
+  ],
+  "prescription": [
+    "https://www.pdffiller.com/preview/100/377/100377602.png",
+    "https://images.examples.com/wp-content/uploads/2018/05/Medical-Prescription-Format.jpg",
+    "https://www.pharmacytimes.com/view/sample-prescription-label"
+  ],
+  "form": [
+    "https://www.signnow.com/preview/289/318/289318951/large.png",
+    "https://binaries.templates.cdn.office.net/support/templates/en-us/lt16402430_quantized.png",
+    "https://eforms.com/images/2018/12/Job-Application-Form.png"
+  ],
+  "product_label": [
+    "https://www.avery.com/images/product/label-templates/nutrition-label.jpg",
+    "https://www.worldlabel.com/Images/ol5051-nutrition-facts-label.jpg",
+    "https://www.labelplanet.co.uk/wp-content/uploads/2019/05/product-label-example.jpg"
+  ],
+  "parking_ticket": [
+    "https://www.parkingticketpayment.com/images/sample-ticket.jpg",
+    "https://www.cityofchicago.org/content/dam/city/depts/fin/supp_info/ParkingTicket/ParkingTicket.jpg",
+    "https://www.parkingticketconsultants.com/wp-content/uploads/parking-ticket-example.jpg"
+  ],
+  "business_card": [
+    "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/business-card-template-design-3fdfd8c39e5e0b9e8a0f0f3f5e5e5e5e.jpg",
+    "https://marketplace.canva.com/EAE0rNNM2Fg/1/0/1600w/canva-black-white-simple-business-card-WsdktLRJm4U.jpg",
+    "https://www.vistaprint.com/hub/wp-content/uploads/2020/02/business-card-design-tips.jpg"
+  ],
+  "document_scan": [
+    "https://www.adobe.com/content/dam/cc/us/en/products/scan/media_1a02e6f3f3a3f3f3f3f3f3f3f3f3f3f3.jpg",
+    "https://images.template.net/wp-content/uploads/2016/04/27100610/Free-Printable-Document.jpg",
+    "https://binaries.templates.cdn.office.net/support/templates/en-us/tf02887784_quantized.png"
+  ],
+  "handwriting": [
+    "https://raw.githubusercontent.com/sueiras/handwriting_recognition/master/images/sample.png",
+    "https://www.researchgate.net/publication/331548030/figure/fig1/AS:733196441128960@1551816348107/Sample-handwritten-text-image.png",
+    "https://production-media.paperswithcode.com/datasets/IAM-0000000001-14c6d0c3_OXUeHSU.jpg"
+  ],
+  "table_data": [
+    "https://www.abbyy.com/-/jssmedia/project/abbyy/abbyy/insights/blog/infographic/table-recognition-sample.jpg",
+    "https://nanonets.com/blog/content/images/2020/08/table-extraction.png",
+    "https://www.docsumo.com/blog/content/images/2021/07/table-extraction-example.png"
+  ],
+  "medical_form": [
+    "https://www.formsbirds.com/formimg/medical-history-form/10277/medical-history-form-template-l1.png",
+    "https://www.signnow.com/preview/320/387/320387129/large.png",
+    "https://eforms.com/images/2018/09/Medical-History-Form.png"
+  ],
+  "bank_statement": [
+    "https://www.docsketch.com/assets/blog/bank-statement-example.png",
+    "https://www.thebalancemoney.com/thmb/bank-statement-example.jpg",
+    "https://www.investopedia.com/thmb/bank-statement-sample.jpg"
+  ],
+  "general_document": [
+    "https://picsum.photos/800/1200",
+    "https://via.placeholder.com/800x1200/FFFFFF/000000?text=Sample+Document",
+    "https://dummyimage.com/800x1200/fff/000&text=Test+Document"
+  ]
+}

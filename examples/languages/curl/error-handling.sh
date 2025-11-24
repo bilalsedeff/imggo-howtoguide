@@ -57,7 +57,7 @@ upload_with_retry() {
 
   while [ $retry -lt $MAX_RETRIES ]; do
     retry=$((retry + 1))
-    echo "Upload attempt $retry/$MAX_RETRIES..."
+    echo "Upload attempt $retry/$MAX_RETRIES..." >&2
 
     # Make request and capture both response and HTTP code
     HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
@@ -70,18 +70,18 @@ upload_with_retry() {
     HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
     HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
 
-    echo "  HTTP Status: $HTTP_CODE"
+    echo "  HTTP Status: $HTTP_CODE" >&2
 
     # Success (200-299)
     if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
       JOB_ID=$(echo "$HTTP_BODY" | grep -o '"job_id":"[^"]*"' | cut -d'"' -f4)
 
       if [ -z "$JOB_ID" ]; then
-        echo "  Error: Failed to extract job_id"
+        echo "  Error: Failed to extract job_id" >&2
         return 1
       fi
 
-      echo "  Job created: $JOB_ID"
+      echo "  Job created: $JOB_ID" >&2
       echo "$JOB_ID"
       return 0
     fi
@@ -91,41 +91,41 @@ upload_with_retry() {
       RETRY_AFTER=$(echo "$HTTP_RESPONSE" | grep -i "retry-after:" | awk '{print $2}')
       RETRY_AFTER=${RETRY_AFTER:-60}
 
-      echo "  Rate limited. Waiting $RETRY_AFTER seconds..."
+      echo "  Rate limited. Waiting $RETRY_AFTER seconds..." >&2
 
       if [ $retry -lt $MAX_RETRIES ]; then
         sleep "$RETRY_AFTER"
         continue
       else
-        echo "  Error: Rate limit exceeded after $MAX_RETRIES attempts"
+        echo "  Error: Rate limit exceeded after $MAX_RETRIES attempts" >&2
         return 1
       fi
     fi
 
     # Client errors (400-499) - don't retry
     if [ "$HTTP_CODE" -ge 400 ] && [ "$HTTP_CODE" -lt 500 ]; then
-      echo "  Client error ($HTTP_CODE):"
-      echo "$HTTP_BODY" | grep -o '"error":"[^"]*"' || echo "$HTTP_BODY"
+      echo "  Client error ($HTTP_CODE):" >&2
+      echo "$HTTP_BODY" | grep -o '"error":"[^"]*"' || echo "$HTTP_BODY" >&2
       return 1
     fi
 
     # Server errors (500-599) - retry with exponential backoff
     if [ "$HTTP_CODE" -ge 500 ] && [ "$HTTP_CODE" -lt 600 ]; then
-      echo "  Server error ($HTTP_CODE). Retrying..."
+      echo "  Server error ($HTTP_CODE). Retrying..." >&2
 
       if [ $retry -lt $MAX_RETRIES ]; then
         WAIT_TIME=$((2 ** (retry - 1)))
-        echo "  Waiting $WAIT_TIME seconds before retry..."
+        echo "  Waiting $WAIT_TIME seconds before retry..." >&2
         sleep $WAIT_TIME
         continue
       else
-        echo "  Error: Server error after $MAX_RETRIES attempts"
+        echo "  Error: Server error after $MAX_RETRIES attempts" >&2
         return 1
       fi
     fi
 
     # Unknown error
-    echo "  Unexpected HTTP status: $HTTP_CODE"
+    echo "  Unexpected HTTP status: $HTTP_CODE" >&2
     if [ $retry -lt $MAX_RETRIES ]; then
       WAIT_TIME=$((2 ** (retry - 1)))
       sleep $WAIT_TIME
@@ -176,24 +176,13 @@ poll_job() {
       echo "EXTRACTED DATA"
       echo "============================================================"
 
-      # Extract and validate result
+      # Extract result (same logic as basic-upload.sh)
       if echo "$HTTP_BODY" | grep -q '"manifest"'; then
-        RESULT=$(echo "$HTTP_BODY" | grep -o '"manifest":{[^}]*}' | sed 's/"manifest"://')
-        if [ -z "$RESULT" ]; then
-          echo "Error: Job succeeded but no manifest data returned"
-          return 1
-        fi
-        echo "$RESULT"
+        echo "$HTTP_BODY" | grep -o '"manifest":{[^}]*}' | sed 's/"manifest"://'
       elif echo "$HTTP_BODY" | grep -q '"result"'; then
-        RESULT=$(echo "$HTTP_BODY" | grep -o '"result":{[^}]*}' | sed 's/"result"://')
-        if [ -z "$RESULT" ]; then
-          echo "Error: Job succeeded but no result data returned"
-          return 1
-        fi
-        echo "$RESULT"
+        echo "$HTTP_BODY" | grep -o '"result":{[^}]*}' | sed 's/"result"://'
       else
-        echo "Error: Job succeeded but no data found"
-        return 1
+        echo "$HTTP_BODY"
       fi
 
       echo ""

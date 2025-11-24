@@ -120,7 +120,7 @@ async function uploadImageWithRetry(
 
       // Handle 4xx client errors (don't retry)
       if (axiosError.response?.status && axiosError.response.status >= 400 && axiosError.response.status < 500) {
-        const errorMessage = axiosError.response.data?.error || axiosError.message;
+        const errorMessage = (axiosError.response.data as any)?.error || axiosError.message;
         throw new ValidationError(`Client error (${axiosError.response.status}): ${errorMessage}`);
       }
 

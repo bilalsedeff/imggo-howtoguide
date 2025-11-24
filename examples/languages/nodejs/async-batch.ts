@@ -78,7 +78,7 @@ async function uploadImage(imagePath: string, patternId: string): Promise<Upload
 
   } catch (error) {
     const axiosError = error as AxiosError;
-    const errorMessage = axiosError.response?.data?.error || axiosError.message;
+    const errorMessage = (axiosError.response?.data as any)?.error || axiosError.message;
     console.error(`[UPLOAD FAILED] ${path.basename(imagePath)}: ${errorMessage}`);
     return { imagePath, error: errorMessage };
   }
