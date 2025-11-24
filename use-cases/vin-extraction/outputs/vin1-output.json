@@ -1,0 +1,11 @@
+{
+  "use_case": "vin-extraction",
+  "image": "vin1.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "1FDUF5GY7FEB56312",
+    "vendor": "Ford Motor Company",
+    "total_amount": 0,
+    "date": "09/14"
+  }
+}

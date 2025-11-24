@@ -1,0 +1,11 @@
+{
+  "use_case": "invoice-processing",
+  "image": "invoice2.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "1930",
+    "vendor": "Vendor's company name",
+    "total_amount": 1839.2,
+    "date": "29 Jan 2024"
+  }
+}

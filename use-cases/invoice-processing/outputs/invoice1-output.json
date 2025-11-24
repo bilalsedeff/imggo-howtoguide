@@ -1,0 +1,11 @@
+{
+  "use_case": "invoice-processing",
+  "image": "invoice1.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "INV-10012",
+    "vendor": "Your Company",
+    "total_amount": 1699.48,
+    "date": "26/3/2021"
+  }
+}

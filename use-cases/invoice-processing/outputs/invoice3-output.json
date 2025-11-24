@@ -1,0 +1,11 @@
+{
+  "use_case": "invoice-processing",
+  "image": "invoice3.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "123456789",
+    "vendor": "Jefferson Healthcare",
+    "total_amount": 39.65,
+    "date": "08/07/12"
+  }
+}

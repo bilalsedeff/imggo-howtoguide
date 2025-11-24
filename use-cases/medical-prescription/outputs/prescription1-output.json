@@ -1,0 +1,11 @@
+{
+  "use_case": "medical-prescription",
+  "image": "prescription1.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "10072",
+    "vendor": "Wyeth",
+    "total_amount": 0,
+    "date": "23 Jan 99"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "use_case": "invoice-processing",
+  "image": "invoice5.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "QT-2045-112",
+    "vendor": "Global Enterprise Solutions Inc.",
+    "total_amount": 135120,
+    "date": "October 2, 2045"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "use_case": "invoice-processing",
+  "image": "invoice4.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "MSA-TI-02",
+    "vendor": "CA Sakshi and Associates",
+    "total_amount": 118000,
+    "date": "1-Jul-17"
+  }
+}

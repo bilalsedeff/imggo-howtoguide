@@ -1,0 +1,11 @@
+{
+  "use_case": "medical-prescription",
+  "image": "prescription3.jpg",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "",
+    "vendor": "The White Tusk",
+    "total_amount": 0,
+    "date": "12/10/22"
+  }
+}

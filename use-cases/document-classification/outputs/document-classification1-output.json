@@ -1,0 +1,11 @@
+{
+  "use_case": "document-classification",
+  "image": "document-classification1.png",
+  "pattern_id": "24f3f9f0-70cd-4b4b-b348-6b5691f859ba",
+  "result": {
+    "invoice_number": "null",
+    "vendor": "null",
+    "total_amount": 0,
+    "date": "null"
+  }
+}
