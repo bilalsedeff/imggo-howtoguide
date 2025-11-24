@@ -24,10 +24,13 @@ def create_prescription_pattern():
     }
 
     # Prescription pattern - plain text format
+    # Based on ImgGo API structure: https://img-go.com/docs#api-endpoints
+    # Valid formats: json, yaml, xml, csv, text
     payload = {
         "name": "Medical Prescription - Plain Text",
         "instructions": "Extract all text from the medical prescription including: patient name, doctor name, clinic/hospital name, prescription date, medication names, dosages, frequency, duration, special instructions, and refill information. Format as readable plain text.",
-        "response_format": "text"
+        "format": "text",
+        "plain_text_schema": "# Patient Information\nName: [patient_name]\n\n# Doctor Information\nName: [doctor_name]\nClinic: [clinic_name]\n\n# Prescription Details\nDate: [date]\n\n# Medications\n[medication_list]\n\n# Instructions\n[instructions]"
     }
 
     print("=" * 60)
@@ -37,6 +40,11 @@ def create_prescription_pattern():
 
     try:
         response = requests.post(url, headers=headers, json=payload)
+
+        print(f"Response Status: {response.status_code}")
+        if response.status_code != 201:
+            print(f"Response Body: {response.text}")
+
         response.raise_for_status()
 
         data = response.json()

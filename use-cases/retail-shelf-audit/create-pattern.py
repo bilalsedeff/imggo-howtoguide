@@ -23,37 +23,23 @@ def create_shelf_audit_pattern():
         "Content-Type": "application/json"
     }
 
-    # Shelf audit pattern with structured JSON output
+    # Shelf audit pattern - JSON format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
+    # All properties must be in required array
     payload = {
         "name": "Retail Shelf Audit - JSON",
-        "instructions": "Analyze the retail shelf image and extract: all visible products with brand names, product count per brand (facings), shelf position, out-of-stock gaps, planogram compliance, price tags if visible, and promotional items. Calculate total facings, unique SKUs, and brand share percentages.",
-        "response_format": "image_analysis",
-        "schema": {
+        "instructions": "Analyze the retail shelf image and extract: product brands, total facings count, unique SKUs count, and out-of-stock count.",
+        "format": "json",
+        "json_schema": {
             "type": "object",
             "properties": {
-                "products": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "brand": {"type": "string"},
-                            "product_name": {"type": "string"},
-                            "facings": {"type": "number"},
-                            "shelf_level": {"type": "string"},
-                            "position": {"type": "string"},
-                            "price": {"type": "string"}
-                        }
-                    }
-                },
+                "brands_detected": {"type": "string"},
                 "total_facings": {"type": "number"},
                 "unique_skus": {"type": "number"},
-                "out_of_stock_count": {"type": "number"},
-                "brand_share": {
-                    "type": "object",
-                    "additionalProperties": {"type": "number"}
-                }
+                "out_of_stock_count": {"type": "number"}
             },
-            "required": ["products", "total_facings"]
+            "required": ["brands_detected", "total_facings", "unique_skus", "out_of_stock_count"],
+            "additionalProperties": False
         }
     }
 

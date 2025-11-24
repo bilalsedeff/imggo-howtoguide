@@ -13,11 +13,13 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # YAML output format for construction progress
+    # Based on ImgGo API structure: https://img-go.com/docs#api-endpoints
     payload = {
-        "name": "Construction Progress - JSON",
-        "instructions": "Document construction site progress. Identify: completed work phases, equipment present, worker count, safety compliance, weather conditions.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "name": "Construction Progress - YAML",
+        "instructions": "Document construction site progress. Identify: completed work phases, equipment present, worker count, safety compliance, weather conditions. Output as YAML with clear key-value pairs.",
+        "format": "yaml",
+        "yaml_schema": "project_phase: string\ncompletion_percentage: number\nequipment_present: array\nworker_count: number\nsafety_compliant: boolean\nweather: string"
     }
 
     print("=" * 60)
@@ -31,6 +33,11 @@ def create_pattern():
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
             json=payload
         )
+
+        print(f"Response Status: {response.status_code}")
+        if response.status_code != 201:
+            print(f"Response Body: {response.text}")
+
         response.raise_for_status()
 
         pattern_id = response.json().get("data", {}).get("id")

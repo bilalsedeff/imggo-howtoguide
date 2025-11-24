@@ -1,5 +1,6 @@
 """
 Simple Inventory Management Test
+Test the pattern with a sample inventory image
 """
 
 import os
@@ -18,12 +19,19 @@ def main():
         print("\nX Error: IMGGO_API_KEY not set")
         sys.exit(1)
 
+    # Check pattern ID - from env var or pattern_id.txt
     pattern_id = os.getenv("INVENTORY_PATTERN_ID")
     if not pattern_id:
+        pattern_file = Path(__file__).parent / "pattern_id.txt"
+        if pattern_file.exists():
+            pattern_id = pattern_file.read_text().strip()
+    if not pattern_id:
         print("\nX Error: INVENTORY_PATTERN_ID not set")
+        print("Run create-pattern.py first to create a pattern")
         sys.exit(1)
 
-    test_image = Path(__file__).parent.parent.parent / "test-images" / "inventory1.jpg"
+    # Use inventory image
+    test_image = Path(__file__).parent.parent.parent / "examples" / "test-images" / "inventory1.jpg"
     if not test_image.exists():
         print(f"\nX Error: Test image not found: {test_image}")
         sys.exit(1)
@@ -45,15 +53,21 @@ def main():
         outputs_dir = Path(__file__).parent / "outputs"
         outputs_dir.mkdir(exist_ok=True)
 
+        # CSV format output
         output_file = outputs_dir / "inventory1_output.csv"
+        # Result could be dict with _raw field or string
+        if isinstance(result, dict):
+            csv_content = result.get('_raw', str(result))
+        else:
+            csv_content = result
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(result)
+            f.write(csv_content)
 
         print(f"V Output saved to: {output_file}\n")
         print("="*60)
         print("EXTRACTED CSV DATA")
         print("="*60)
-        print(result)
+        print(csv_content)
         print("\nV Test completed successfully!")
 
     except Exception as e:

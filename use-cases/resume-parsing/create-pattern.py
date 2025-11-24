@@ -24,10 +24,13 @@ def create_resume_pattern():
     }
 
     # Pattern for resume parsing - using plain text format
+    # Based on ImgGo API: format must be json, yaml, xml, csv, or text
+    # text format requires plain_text_schema with # headings
     payload = {
         "name": "Resume Parsing - Plain Text",
-        "instructions": "Extract all text from the resume/CV including: candidate name, contact information (email, phone, location, LinkedIn), professional summary, work experience with job titles and companies, education, skills, certifications, and languages. Format as readable plain text with clear sections.",
-        "response_format": "text"
+        "instructions": "Extract all text from the resume/CV including: candidate name, contact information (email, phone, location, LinkedIn), professional summary, work experience with job titles and companies, education, skills, certifications, and languages.",
+        "format": "text",
+        "plain_text_schema": "# Candidate Information\nName: [name]\nEmail: [email]\nPhone: [phone]\nLocation: [location]\n\n# Professional Summary\n[summary]\n\n# Work Experience\n[experience]\n\n# Education\n[education]\n\n# Skills\n[skills]"
     }
 
     print("=" * 60)
@@ -35,11 +38,16 @@ def create_resume_pattern():
     print("=" * 60)
     print()
     print(f"Name: {payload['name']}")
-    print(f"Format: {payload['response_format']}")
+    print(f"Format: {payload['format']}")
     print()
 
     try:
         response = requests.post(url, headers=headers, json=payload)
+
+        print(f"Response Status: {response.status_code}")
+        if response.status_code != 201:
+            print(f"Response: {response.text}")
+
         response.raise_for_status()
 
         data = response.json()

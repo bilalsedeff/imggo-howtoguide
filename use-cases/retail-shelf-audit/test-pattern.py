@@ -25,15 +25,19 @@ def main():
         print("Please set your API key in .env file")
         sys.exit(1)
 
-    # Check pattern ID
+    # Check pattern ID - from env var or pattern_id.txt
     pattern_id = os.getenv("SHELF_AUDIT_PATTERN_ID")
+    if not pattern_id:
+        pattern_file = Path(__file__).parent / "pattern_id.txt"
+        if pattern_file.exists():
+            pattern_id = pattern_file.read_text().strip()
     if not pattern_id:
         print("\nX Error: SHELF_AUDIT_PATTERN_ID not set")
         print("Run create-pattern.py first to create a pattern")
         sys.exit(1)
 
     # Get test image
-    test_image = Path(__file__).parent.parent.parent / "test-images" / "inventory1.jpg"
+    test_image = Path(__file__).parent.parent.parent / "examples" / "test-images" / "inventory1.jpg"
 
     if not test_image.exists():
         print(f"\nX Error: Test image not found: {test_image}")
@@ -62,7 +66,7 @@ def main():
 
         # Try to parse as JSON
         try:
-            shelf_data = json.loads(result)
+            shelf_data = result if isinstance(result, dict) else json.loads(result)
             output_file = outputs_dir / "shelf_audit_output.json"
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(shelf_data, f, indent=2)

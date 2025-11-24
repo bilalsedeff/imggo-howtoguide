@@ -24,15 +24,19 @@ def main():
         print("Please set your API key in .env file")
         sys.exit(1)
 
-    # Check pattern ID
+    # Check pattern ID - from env var or pattern_id.txt
     pattern_id = os.getenv("PRESCRIPTION_PATTERN_ID")
+    if not pattern_id:
+        pattern_file = Path(__file__).parent / "pattern_id.txt"
+        if pattern_file.exists():
+            pattern_id = pattern_file.read_text().strip()
     if not pattern_id:
         print("\nX Error: PRESCRIPTION_PATTERN_ID not set")
         print("Run create-pattern.py first to create a pattern")
         sys.exit(1)
 
     # Get test image
-    test_image = Path(__file__).parent.parent.parent / "test-images" / "prescription1.jpg"
+    test_image = Path(__file__).parent.parent.parent / "examples" / "test-images" / "prescription1.jpg"
 
     if not test_image.exists():
         print(f"\nX Error: Test image not found: {test_image}")
@@ -60,8 +64,13 @@ def main():
         outputs_dir.mkdir(exist_ok=True)
 
         output_file = outputs_dir / "prescription1_output.txt"
+        # Result could be dict with _raw field or string
+        if isinstance(result, dict):
+            content = result.get('_raw', str(result))
+        else:
+            content = result
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(result)
+            f.write(content)
 
         print(f"V Output saved to: {output_file}")
         print()
@@ -70,9 +79,9 @@ def main():
         print("="*60)
         print("EXTRACTED TEXT (first 500 chars)")
         print("="*60)
-        print(result[:500])
-        if len(result) > 500:
-            print(f"\n... ({len(result) - 500} more characters)")
+        print(content[:500])
+        if len(content) > 500:
+            print(f"\n... ({len(content) - 500} more characters)")
         print()
 
         print("V Test completed successfully!")

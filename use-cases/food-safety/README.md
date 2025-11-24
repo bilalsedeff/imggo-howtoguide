@@ -30,11 +30,13 @@ Traditional inspection processes rely on handwritten notes, clipboard checklists
 ImgGo extracts violations, temperature readings, and facility conditions from inspection photos and outputs **CSV files** that import directly into health department databases:
 
 **Workflow**:
-```
+
+```plaintext
 Inspection Photos (Cloud URL) → ImgGo API → CSV Output → Health Department Database
 ```
 
 **What Gets Extracted**:
+
 - Health code violations with codes
 - Temperature readings from thermometers
 - Handwashing station compliance
@@ -57,6 +59,7 @@ CSV is the standard format for health department reporting:
 - **Compliance Reports**: Generate trend reports for regulatory agencies
 
 **Example Output (restaurant_inspection_2025-01-22.csv)**:
+
 ```csv
 Inspection_ID,Restaurant_Name,Address,Inspector_ID,Inspection_Date,Inspection_Time,Violation_Code,Violation_Category,Violation_Description,Severity,Location_In_Facility,Corrected_On_Site,Temperature_Reading,Critical_Violation,Photo_Evidence_URL,Notes
 INS-2025-001234,Tasty Burgers Downtown,123 Main St,INSP-042,2025-01-22,14:30,2-102.11,Food Temperature,Cold holding temperature 48°F (should be ≤41°F),Critical,Walk-in cooler,No,48.2,Yes,https://s3.../walk-in-cooler.jpg,Potentially Hazardous Foods (PHF) held at improper temperature
@@ -689,4 +692,4 @@ def track_multi_location_compliance(chain_name):
 
 - API Documentation: [https://img-go.com/docs](https://img-go.com/docs)
 - CSV Output Guide: [https://img-go.com/docs/output-formats#csv](https://img-go.com/docs/output-formats#csv)
-- Integration Help: support@img-go.com
+- Integration Help: <support@img-go.com>

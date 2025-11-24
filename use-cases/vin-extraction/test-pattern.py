@@ -25,15 +25,19 @@ def main():
         print("Please set your API key in .env file")
         sys.exit(1)
 
-    # Check pattern ID
+    # Check pattern ID - from env var or pattern_id.txt
     pattern_id = os.getenv("VIN_PATTERN_ID")
+    if not pattern_id:
+        pattern_file = Path(__file__).parent / "pattern_id.txt"
+        if pattern_file.exists():
+            pattern_id = pattern_file.read_text().strip()
     if not pattern_id:
         print("\nX Error: VIN_PATTERN_ID not set")
         print("Run create-pattern.py first to create a pattern")
         sys.exit(1)
 
     # Get test image
-    test_image = Path(__file__).parent.parent.parent / "test-images" / "vin1.jpg"
+    test_image = Path(__file__).parent.parent.parent / "examples" / "test-images" / "vin1.jpg"
 
     if not test_image.exists():
         print(f"\nX Error: Test image not found: {test_image}")
@@ -62,7 +66,7 @@ def main():
 
         # Try to parse as JSON
         try:
-            vin_data = json.loads(result)
+            vin_data = result if isinstance(result, dict) else json.loads(result)
             output_file = outputs_dir / "vin1_output.json"
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(vin_data, f, indent=2)

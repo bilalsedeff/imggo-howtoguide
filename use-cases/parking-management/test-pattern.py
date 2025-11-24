@@ -21,11 +21,15 @@ def main():
 
     pattern_id = os.getenv("PARKING_PATTERN_ID")
     if not pattern_id:
+        pattern_file = Path(__file__).parent / "pattern_id.txt"
+        if pattern_file.exists():
+            pattern_id = pattern_file.read_text().strip()
+    if not pattern_id:
         print("\nX Error: PARKING_PATTERN_ID not set")
         print("Run create-pattern.py first")
         sys.exit(1)
 
-    test_image = Path(__file__).parent.parent.parent / "test-images" / "parking1.jpg"
+    test_image = Path(__file__).parent.parent.parent / "examples" / "test-images" / "parking1.jpg"
     if not test_image.exists():
         print(f"\nX Error: Test image not found: {test_image}")
         sys.exit(1)
@@ -48,16 +52,21 @@ def main():
         outputs_dir.mkdir(exist_ok=True)
 
         output_file = outputs_dir / "parking1_output.xml"
+        # Result could be dict with _raw field or string
+        if isinstance(result, dict):
+            xml_content = result.get('_raw', str(result))
+        else:
+            xml_content = result
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(result)
+            f.write(xml_content)
 
         print(f"V Output saved to: {output_file}\n")
         print("="*60)
         print("EXTRACTED DATA (first 500 chars)")
         print("="*60)
-        print(result[:500])
-        if len(result) > 500:
-            print(f"\n... ({len(result) - 500} more characters)")
+        print(xml_content[:500])
+        if len(xml_content) > 500:
+            print(f"\n... ({len(xml_content) - 500} more characters)")
         print("\nV Test completed successfully!")
 
     except Exception as e:

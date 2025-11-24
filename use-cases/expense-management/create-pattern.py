@@ -13,11 +13,13 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Expense management pattern - CSV format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
     payload = {
-        "name": "Expense Receipt - JSON",
-        "instructions": "Extract expense data from receipts. Fields: merchant name, date, total amount, items, payment method, category.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "name": "Expense Receipt - CSV",
+        "instructions": "Extract expense data from receipts. Output merchant name, date, total amount, and category as CSV.",
+        "format": "csv",
+        "csv_schema": "merchant_name,date,total_amount,category"
     }
 
     print("=" * 60)

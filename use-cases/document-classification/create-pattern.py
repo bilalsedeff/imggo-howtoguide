@@ -13,11 +13,23 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Based on ImgGo API: format must be json, yaml, xml, csv, or text
+    # All properties must be in required array
     payload = {
         "name": "Document Classification - JSON",
-        "instructions": "Classify document type and extract key metadata. Types: invoice, receipt, contract, form, ID, medical record, etc.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "instructions": "Classify document type and extract key metadata. Document types: invoice, receipt, contract, form, ID, medical record, letter, report.",
+        "format": "json",
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "document_type": {"type": "string"},
+                "confidence": {"type": "number"},
+                "key_fields": {"type": "string"},
+                "language": {"type": "string"}
+            },
+            "required": ["document_type", "confidence", "key_fields", "language"],
+            "additionalProperties": False
+        }
     }
 
     print("=" * 60)
@@ -31,6 +43,11 @@ def create_pattern():
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
             json=payload
         )
+
+        print(f"Response Status: {response.status_code}")
+        if response.status_code != 201:
+            print(f"Response: {response.text}")
+
         response.raise_for_status()
 
         pattern_id = response.json().get("data", {}).get("id")

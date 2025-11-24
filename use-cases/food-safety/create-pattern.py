@@ -13,11 +13,13 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Food safety pattern - YAML format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
     payload = {
-        "name": "Food Safety Inspection - JSON",
-        "instructions": "Inspect food handling areas for safety violations. Detect: improper food storage, temperature abuse, cross-contamination risks, cleanliness issues, pest evidence, expired products.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "name": "Food Safety Inspection - YAML",
+        "instructions": "Inspect food handling areas for safety violations. Identify violations found, cleanliness score (1-10), and overall compliance status.",
+        "format": "yaml",
+        "yaml_schema": "violations_found: array\ncleanliness_score: number\ncompliance_status: string\nrecommendations: string"
     }
 
     print("=" * 60)

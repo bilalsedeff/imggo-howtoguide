@@ -1,0 +1,1 @@
+<ns0:Envelope xmlns:ns0="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><ns0:Body><Invoice><invoicenumber>1930</invoicenumber><vendor>Vendor's company name</vendor><totalamount>1839.2</totalamount><date>29 Jan 2024</date></Invoice></ns0:Body></ns0:Envelope>

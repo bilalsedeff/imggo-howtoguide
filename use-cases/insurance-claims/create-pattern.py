@@ -13,11 +13,24 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Insurance claims pattern - JSON format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
+    # All properties must be in required array
     payload = {
         "name": "Insurance Claims - JSON",
-        "instructions": "Analyze damage photos for insurance claims. Detect: damage type, severity, affected areas, estimated repair cost indicators, date if visible.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "instructions": "Analyze damage photos for insurance claims. Detect damage type, severity level, and affected areas.",
+        "format": "json",
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "damage_type": {"type": "string"},
+                "severity": {"type": "string"},
+                "affected_areas": {"type": "string"},
+                "estimated_cost": {"type": "string"}
+            },
+            "required": ["damage_type", "severity", "affected_areas", "estimated_cost"],
+            "additionalProperties": False
+        }
     }
 
     print("=" * 60)

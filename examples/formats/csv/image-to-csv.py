@@ -11,7 +11,7 @@ import csv
 # Add common utilities to path
 sys.path.append(str(Path(__file__).parent.parent / "common"))
 
-from common.imggo_client import ImgGoClient
+from imggo_client import ImgGoClient
 
 
 def example_inventory_to_csv():

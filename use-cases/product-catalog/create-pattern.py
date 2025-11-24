@@ -13,11 +13,13 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Product catalog pattern - CSV format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
     payload = {
-        "name": "Product Catalog - JSON",
-        "instructions": "Extract product information from catalog images. Fields: product name, SKU, price, description, specifications, availability.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "name": "Product Catalog - CSV",
+        "instructions": "Extract product information from catalog images. Output product name, SKU, price, and availability as CSV.",
+        "format": "csv",
+        "csv_schema": "product_name,sku,price,availability"
     }
 
     print("=" * 60)

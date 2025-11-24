@@ -13,11 +13,24 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Quality control pattern - JSON format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
+    # All properties must be in required array
     payload = {
         "name": "Quality Control Inspection - JSON",
-        "instructions": "Inspect products for quality issues. Detect: defects, scratches, discoloration, misalignment, packaging damage, missing components.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "instructions": "Inspect products for quality issues. Detect defects, quality rating (1-10), and pass/fail status.",
+        "format": "json",
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "defects_found": {"type": "string"},
+                "quality_rating": {"type": "number"},
+                "pass_fail": {"type": "string"},
+                "notes": {"type": "string"}
+            },
+            "required": ["defects_found", "quality_rating", "pass_fail", "notes"],
+            "additionalProperties": False
+        }
     }
 
     print("=" * 60)

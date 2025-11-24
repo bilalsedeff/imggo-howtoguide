@@ -1,5 +1,5 @@
 """
-Create ImgGo Pattern for Gdpr Anonymization
+Create ImgGo Pattern for GDPR Anonymization
 """
 
 import os
@@ -13,10 +13,14 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # GDPR anonymization pattern - Text format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
+    # Text format requires plain_text_schema with # headings
     payload = {
         "name": "GDPR Data Anonymization - Text",
-        "instructions": "Detect and anonymize PII in documents. Identify: names, emails, phone numbers, addresses, SSN, credit cards. Return anonymized version.",
-        "response_format": "text"
+        "instructions": "Detect and list all PII in documents. Identify: names, emails, phone numbers, addresses, SSN, credit cards. List each type of PII found.",
+        "format": "text",
+        "plain_text_schema": "# Document Analysis\nDocument Type: [type]\n\n# PII Detected\n[pii_list]\n\n# Anonymization Required\n[anonymization_details]\n\n# Recommendations\n[recommendations]"
     }
 
     print("=" * 60)
@@ -30,6 +34,11 @@ def create_pattern():
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
             json=payload
         )
+
+        print(f"Response Status: {response.status_code}")
+        if response.status_code != 201:
+            print(f"Response: {response.text}")
+
         response.raise_for_status()
 
         pattern_id = response.json().get("data", {}).get("id")

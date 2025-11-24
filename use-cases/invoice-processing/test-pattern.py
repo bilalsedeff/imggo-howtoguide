@@ -12,9 +12,18 @@ from pathlib import Path
 IMGGO_API_KEY = os.getenv("IMGGO_API_KEY", "your_api_key_here")
 IMGGO_BASE_URL = "https://img-go.com/api"
 
-# Pattern ID for invoice processing (you'll create this in ImgGo dashboard)
-# Instructions: "Extract vendor name, invoice number, date, line items, and total amount from invoice"
-INVOICE_PATTERN_ID = os.getenv("INVOICE_PATTERN_ID", "pat_invoice_example")
+# Pattern ID - read from env var or pattern_id.txt
+def get_pattern_id():
+    pattern_id = os.getenv("INVOICE_PATTERN_ID")
+    if pattern_id:
+        return pattern_id
+    # Try reading from pattern_id.txt
+    pattern_file = Path(__file__).parent / "pattern_id.txt"
+    if pattern_file.exists():
+        return pattern_file.read_text().strip()
+    return None
+
+INVOICE_PATTERN_ID = get_pattern_id()
 
 
 def process_invoice(image_path):
@@ -30,8 +39,12 @@ def process_invoice(image_path):
     print(f"Processing invoice: {image_path}")
 
     # Step 1: Upload image directly to ImgGo
+    import mimetypes
+    filename = Path(image_path).name
+    mime_type, _ = mimetypes.guess_type(image_path)
+
     with open(image_path, 'rb') as f:
-        files = {'file': f}
+        files = {'image': (filename, f, mime_type or 'image/jpeg')}
 
         response = requests.post(
             f"{IMGGO_BASE_URL}/patterns/{INVOICE_PATTERN_ID}/ingest",
@@ -77,9 +90,10 @@ def poll_for_result(job_id, max_attempts=30, wait_seconds=2):
 
         status = job_status["data"]["status"]
 
-        if status == "completed":
-            print(f"✓ Processing complete!")
-            return job_status["data"]["result"]
+        if status in ("completed", "succeeded"):
+            print(f"V Processing complete!")
+            # API returns result in "manifest" field for succeeded jobs
+            return job_status["data"].get("manifest") or job_status["data"].get("result")
         elif status == "failed":
             error = job_status["data"].get("error", "Unknown error")
             raise Exception(f"Job failed: {error}")
@@ -95,7 +109,7 @@ def main():
     Example usage: Process a sample invoice
     """
     # Get path to test invoice
-    test_invoice = Path(__file__).parent.parent.parent.parent / "test-images" / "invoice1.jpg"
+    test_invoice = Path(__file__).parent.parent.parent / "examples" / "test-images" / "invoice1.jpg"
 
     if not test_invoice.exists():
         print(f"Error: Test invoice not found at {test_invoice}")
@@ -123,10 +137,10 @@ def main():
         with open(output_file, 'w') as f:
             json.dump(invoice_data, f, indent=2)
 
-        print(f"\n✓ Results saved to {output_file}")
+        print(f"\nV Results saved to {output_file}")
 
     except Exception as e:
-        print(f"\n✗ Error processing invoice: {e}")
+        print(f"\nX Error processing invoice: {e}")
         raise
 
 

@@ -13,11 +13,24 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # KYC verification pattern - JSON format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
+    # All properties must be in required array
     payload = {
         "name": "KYC Document Verification - JSON",
-        "instructions": "Extract data from KYC documents (ID cards, passports, driver licenses). Extract: full name, date of birth, document number, expiry date, nationality, address.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "instructions": "Extract data from KYC documents (ID cards, passports, driver licenses). Extract full name, date of birth, document number, and expiry date.",
+        "format": "json",
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "full_name": {"type": "string"},
+                "date_of_birth": {"type": "string"},
+                "document_number": {"type": "string"},
+                "expiry_date": {"type": "string"}
+            },
+            "required": ["full_name", "date_of_birth", "document_number", "expiry_date"],
+            "additionalProperties": False
+        }
     }
 
     print("=" * 60)

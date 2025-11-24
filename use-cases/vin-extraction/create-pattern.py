@@ -23,33 +23,13 @@ def create_vin_pattern():
         "Content-Type": "application/json"
     }
 
-    # VIN extraction pattern with structured JSON output
+    # VIN extraction pattern with CSV output format
+    # Based on ImgGo API structure: https://img-go.com/docs#api-endpoints
     payload = {
-        "name": "VIN Extraction - JSON",
-        "instructions": "Extract the Vehicle Identification Number (VIN) from the image. VIN is a 17-character alphanumeric code. Also extract vehicle make, model, and year if visible.",
-        "response_format": "image_analysis",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "vin": {
-                    "type": "string",
-                    "description": "17-character VIN code"
-                },
-                "make": {
-                    "type": "string",
-                    "description": "Vehicle manufacturer"
-                },
-                "model": {
-                    "type": "string",
-                    "description": "Vehicle model"
-                },
-                "year": {
-                    "type": "number",
-                    "description": "Model year"
-                }
-            },
-            "required": ["vin"]
-        }
+        "name": "VIN Extraction - CSV",
+        "instructions": "Extract the Vehicle Identification Number (VIN) from the image. VIN is a 17-character alphanumeric code. Also extract vehicle make, model, and year if visible. Output as CSV with headers: vin,make,model,year",
+        "format": "csv",
+        "csv_schema": "vin,make,model,year"
     }
 
     print("=" * 60)
@@ -59,6 +39,11 @@ def create_vin_pattern():
 
     try:
         response = requests.post(url, headers=headers, json=payload)
+
+        print(f"Response Status: {response.status_code}")
+        if response.status_code != 201:
+            print(f"Response Body: {response.text}")
+
         response.raise_for_status()
 
         data = response.json()

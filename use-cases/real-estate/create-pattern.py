@@ -13,11 +13,13 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Real estate pattern - YAML format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
     payload = {
-        "name": "Real Estate Listing - JSON",
-        "instructions": "Extract data from property images and listings. Identify: property type, rooms, features, condition, estimated value indicators.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "name": "Real Estate Listing - YAML",
+        "instructions": "Extract data from property images. Identify property type, room count, features, and condition assessment.",
+        "format": "yaml",
+        "yaml_schema": "property_type: string\nroom_count: number\nfeatures: array\ncondition: string\nnotes: string"
     }
 
     print("=" * 60)

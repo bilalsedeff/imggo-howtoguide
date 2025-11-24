@@ -13,11 +13,24 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Medical records pattern - JSON format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
+    # All properties must be in required array
     payload = {
         "name": "Medical Records - JSON",
-        "instructions": "Extract data from medical records. Fields: patient name, DOB, diagnosis, medications, procedures, dates, doctor name.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "instructions": "Extract data from medical records. Extract patient name, diagnosis, medications, and doctor name.",
+        "format": "json",
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "patient_name": {"type": "string"},
+                "diagnosis": {"type": "string"},
+                "medications": {"type": "string"},
+                "doctor_name": {"type": "string"}
+            },
+            "required": ["patient_name", "diagnosis", "medications", "doctor_name"],
+            "additionalProperties": False
+        }
     }
 
     print("=" * 60)

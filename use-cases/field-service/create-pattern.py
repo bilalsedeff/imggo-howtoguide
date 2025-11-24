@@ -13,11 +13,13 @@ def create_pattern():
         print("X Error: IMGGO_API_KEY not set")
         return None
 
+    # Field service pattern - YAML format
+    # Based on ImgGo API: https://img-go.com/docs#api-endpoints
     payload = {
-        "name": "Field Service Report - JSON",
-        "instructions": "Extract data from field service photos. Identify: equipment ID, condition, meter readings, issue detected, location.",
-        "response_format": "image_analysis",
-        "schema": {"type": "object", "properties": {}, "required": []}
+        "name": "Field Service Report - YAML",
+        "instructions": "Extract data from field service photos. Identify equipment ID, condition, meter reading, and issues detected.",
+        "format": "yaml",
+        "yaml_schema": "equipment_id: string\ncondition: string\nmeter_reading: string\nissues_detected: string\nlocation: string"
     }
 
     print("=" * 60)

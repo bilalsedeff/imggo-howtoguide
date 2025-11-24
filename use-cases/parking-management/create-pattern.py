@@ -23,12 +23,13 @@ def create_parking_pattern():
         "Content-Type": "application/json"
     }
 
-    # Parking management pattern
+    # Parking management pattern with XML output
+    # Based on ImgGo API structure: https://img-go.com/docs#api-endpoints
     payload = {
         "name": "Parking Management - XML",
-        "instructions": "Extract license plate number, vehicle make, model, color, type (car/truck/SUV), timestamp, and parking spot number if visible. Also detect if multiple vehicles are in frame.",
-        "response_format": "xml",
-        "xml_root_element": "ParkingEvent"
+        "instructions": "Extract license plate number, vehicle make, model, color, type (car/truck/SUV), timestamp, and parking spot number if visible. Output as XML with root element ParkingEvent.",
+        "format": "xml",
+        "xml_schema": "<ParkingEvent><license_plate/><vehicle_make/><vehicle_model/><vehicle_color/><vehicle_type/><parking_spot/></ParkingEvent>"
     }
 
     print("=" * 60)
@@ -38,6 +39,11 @@ def create_parking_pattern():
 
     try:
         response = requests.post(url, headers=headers, json=payload)
+
+        print(f"Response Status: {response.status_code}")
+        if response.status_code != 201:
+            print(f"Response Body: {response.text}")
+
         response.raise_for_status()
 
         data = response.json()

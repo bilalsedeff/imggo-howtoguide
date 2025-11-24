@@ -25,69 +25,22 @@ def create_invoice_pattern():
     }
 
     # Pattern configuration for invoice processing
+    # Based on ImgGo API structure: https://img-go.com/docs#api-endpoints
+    # Note: All properties in schema must be in required array
     payload = {
-        "name": "Invoice Processing - JSON",
-        "instructions": "Extract all invoice data including vendor name, invoice number, date, due date, line items with descriptions and amounts, subtotal, tax, and total amount. Format as structured JSON.",
-        "response_format": "image_analysis",
-        "schema": {
+        "name": "Invoice Processing - JSON v2",
+        "instructions": "Extract invoice data including vendor name, invoice number, date, and total amount.",
+        "format": "json",
+        "json_schema": {
             "type": "object",
             "properties": {
-                "invoice_number": {
-                    "type": "string",
-                    "description": "Invoice or reference number"
-                },
-                "vendor": {
-                    "type": "string",
-                    "description": "Vendor or company name"
-                },
-                "invoice_date": {
-                    "type": "string",
-                    "description": "Invoice issue date"
-                },
-                "due_date": {
-                    "type": "string",
-                    "description": "Payment due date"
-                },
-                "subtotal": {
-                    "type": "number",
-                    "description": "Subtotal before tax"
-                },
-                "tax_amount": {
-                    "type": "number",
-                    "description": "Tax amount"
-                },
-                "total_amount": {
-                    "type": "number",
-                    "description": "Total amount due"
-                },
-                "currency": {
-                    "type": "string",
-                    "description": "Currency code (USD, EUR, etc.)"
-                },
-                "line_items": {
-                    "type": "array",
-                    "description": "List of invoice line items",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "description": {
-                                "type": "string"
-                            },
-                            "quantity": {
-                                "type": "number"
-                            },
-                            "unit_price": {
-                                "type": "number"
-                            },
-                            "amount": {
-                                "type": "number"
-                            }
-                        },
-                        "required": ["description", "amount"]
-                    }
-                }
+                "invoice_number": {"type": "string"},
+                "vendor": {"type": "string"},
+                "invoice_date": {"type": "string"},
+                "total_amount": {"type": "number"}
             },
-            "required": ["invoice_number", "vendor", "total_amount"]
+            "required": ["invoice_number", "vendor", "invoice_date", "total_amount"],
+            "additionalProperties": False
         }
     }
 
@@ -97,12 +50,16 @@ def create_invoice_pattern():
     print()
     print("Configuration:")
     print(f"  Name: {payload['name']}")
-    print(f"  Format: {payload['response_format']}")
+    print(f"  Format: {payload['format']}")
     print(f"  Instructions: {payload['instructions'][:80]}...")
     print()
 
     try:
         response = requests.post(url, headers=headers, json=payload)
+
+        print(f"Response Status: {response.status_code}")
+        print(f"Response Body: {response.text}")
+
         response.raise_for_status()
 
         data = response.json()
@@ -132,6 +89,7 @@ def create_invoice_pattern():
         if e.response:
             print(f"  Status: {e.response.status_code}")
             print(f"  Response: {e.response.text}")
+            print(f"  Headers: {dict(e.response.headers)}")
     except Exception as e:
         print(f"X Error: {e}")
 

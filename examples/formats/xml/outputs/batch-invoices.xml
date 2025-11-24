@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Invoices>
+  <Invoice>
+    <invoicenumber>INV-10012</invoicenumber>
+    <vendor>Your Company</vendor>
+    <totalamount>1699.48</totalamount>
+    <date>26/3/2021</date>
+  </Invoice>
+  <Invoice>
+    <invoicenumber>1930</invoicenumber>
+    <vendor>Vendor's company name</vendor>
+    <totalamount>1839.2</totalamount>
+    <date>29 Jan 2024</date>
+  </Invoice>
+  <Invoice>
+    <invoicenumber>123456789</invoicenumber>
+    <vendor>Jefferson Healthcare</vendor>
+    <totalamount>39.65</totalamount>
+    <date>08/07/12</date>
+  </Invoice>
+</Invoices>

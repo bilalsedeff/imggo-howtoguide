@@ -9,7 +9,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 # Add common utilities to path
-sys.path.append(str(Path(__file__).parent.parent / "common"))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent / "common"))
 
 from imggo_client import ImgGoClient
 

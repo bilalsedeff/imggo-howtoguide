@@ -1,0 +1,1 @@
+{'text': '# Patient Information\nJohn R. Doe, HM3, USN\nU.S.S. Neverforgotten (DD 178)\n\n# Doctor Information\nJack R. Frost, LCDR, MD, USNR\n\n# Prescription Details\nDate: 23 Jan 99\nMedical Facility: U.S.S. Neverforgotten (DD 178)\n\n# Medications\nTr Belladonna 15 ml\nAmphogel q.s.ad 120 ml\n\n# Instructions\nM & Ft Solution\nSig: 5mL t.i.d a.c.'}

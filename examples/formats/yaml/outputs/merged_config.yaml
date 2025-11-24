@@ -1,0 +1,14 @@
+project_id: MULTI-SITE-001
+sites:
+- invoice_number: INV-10012
+  vendor: Your Company
+  total_amount: 1699.48
+  date: 26/3/2021
+- invoice_number: '1930'
+  vendor: Vendor's company name
+  total_amount: 1839.2
+  date: 29 Jan 2024
+- invoice_number: '123456789'
+  vendor: Jefferson Healthcare
+  total_amount: 39.65
+  date: 08/07/12

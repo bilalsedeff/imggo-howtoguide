@@ -4,10 +4,11 @@
  */
 
 import axios, { AxiosError } from 'axios';
-import FormData from 'form-data';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+
+const FormData = require('form-data');
 
 dotenv.config();
 
