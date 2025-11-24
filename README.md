@@ -22,7 +22,7 @@ This repository provides practical, end-to-end solutions for automating image da
 
 ## Repository Structure
 
-```
+```plaintext
 ├── docs/                    # Documentation
 │   ├── getting-started/     # Quick start, authentication, first pattern
 │   ├── api-reference/       # API endpoints, webhooks, error handling

@@ -9,8 +9,8 @@
  */
 
 import axios from 'axios';
-import FormData from 'form-data';
-import fs from 'fs';
+const FormData = require('form-data');
+import * as fs from 'fs';
 
 // Configuration
 const IMGGO_API_KEY = process.env.IMGGO_API_KEY;

@@ -11,9 +11,9 @@
  */
 
 import axios, { AxiosError } from 'axios';
-import FormData from 'form-data';
-import fs from 'fs';
-import path from 'path';
+const FormData = require('form-data');
+import * as fs from 'fs';
+import * as path from 'path';
 
 const IMGGO_API_KEY = process.env.IMGGO_API_KEY;
 const IMGGO_BASE_URL = process.env.IMGGO_BASE_URL || 'https://img-go.com/api';
