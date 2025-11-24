@@ -1,0 +1,31 @@
+{
+  "name": "imggo-nodejs-examples",
+  "version": "1.0.0",
+  "description": "Production-ready Node.js/TypeScript examples for the ImgGo API",
+  "main": "index.js",
+  "scripts": {
+    "basic-upload": "ts-node basic-upload.ts",
+    "url-processing": "ts-node url-processing.ts",
+    "error-handling": "ts-node error-handling.ts",
+    "async-batch": "ts-node async-batch.ts"
+  },
+  "keywords": [
+    "imggo",
+    "image-processing",
+    "ocr",
+    "api",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "form-data": "^4.0.0",
+    "dotenv": "^16.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0"
+  }
+}

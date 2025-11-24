@@ -1,0 +1,272 @@
+{
+  "info": {
+    "name": "ImgGo API",
+    "description": "Complete collection of ImgGo API endpoints for image-to-structured-data extraction.\n\n## Setup\n\n1. Import this collection into Postman\n2. Set the `IMGGO_API_KEY` variable (see Variables tab)\n3. Optionally set `IMGGO_BASE_URL` (defaults to https://img-go.com/api)\n4. Run the requests in order\n\n## Workflow\n\n1. Upload image or provide URL → Get job_id\n2. Poll job status → Wait until \"succeeded\"\n3. Extract result from manifest/result field\n\n## Variables\n\n- `IMGGO_API_KEY` - Your API key (required)\n- `IMGGO_BASE_URL` - API base URL (default: https://img-go.com/api)\n- `pattern_id` - Pattern ID to use for extraction\n- `job_id` - Automatically set after upload",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{IMGGO_API_KEY}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "IMGGO_BASE_URL",
+      "value": "https://img-go.com/api",
+      "type": "string"
+    },
+    {
+      "key": "IMGGO_API_KEY",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pattern_id",
+      "value": "pat_your_pattern_id_here",
+      "type": "string"
+    },
+    {
+      "key": "job_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Upload Image (File)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Extract job_id from response and save to collection variable",
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.data && response.data.job_id) {",
+              "        pm.collectionVariables.set('job_id', response.data.job_id);",
+              "        console.log('Job ID saved:', response.data.job_id);",
+              "    }",
+              "}",
+              "",
+              "// Test assertions",
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has job_id', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.data).to.have.property('job_id');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{IMGGO_BASE_URL}}/patterns/{{pattern_id}}/ingest",
+          "host": ["{{IMGGO_BASE_URL}}"],
+          "path": ["patterns", "{{pattern_id}}", "ingest"]
+        },
+        "description": "Upload an image file directly for processing.\n\n**Before running:**\n1. Select an image file in the Body tab\n2. Set your `pattern_id` variable\n\n**After running:**\n- The `job_id` is automatically saved to collection variables\n- Use \"2. Get Job Status\" to check processing status"
+      },
+      "response": []
+    },
+    {
+      "name": "2. Upload Image (URL)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Extract job_id from response and save to collection variable",
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.data && response.data.job_id) {",
+              "        pm.collectionVariables.set('job_id', response.data.job_id);",
+              "        console.log('Job ID saved:', response.data.job_id);",
+              "    }",
+              "}",
+              "",
+              "// Test assertions",
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has job_id', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.data).to.have.property('job_id');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image_url\": \"https://example.com/image.jpg\"\n}"
+        },
+        "url": {
+          "raw": "{{IMGGO_BASE_URL}}/patterns/{{pattern_id}}/ingest",
+          "host": ["{{IMGGO_BASE_URL}}"],
+          "path": ["patterns", "{{pattern_id}}", "ingest"]
+        },
+        "description": "Process an image from a public URL (S3, CDN, etc.).\n\n**Before running:**\n1. Update the `image_url` in the request body\n2. Set your `pattern_id` variable\n\n**After running:**\n- The `job_id` is automatically saved to collection variables\n- Use \"2. Get Job Status\" to check processing status"
+      },
+      "response": []
+    },
+    {
+      "name": "3. Get Job Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test assertions",
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has status field', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.data).to.have.property('status');",
+              "});",
+              "",
+              "// Check job status",
+              "const response = pm.response.json();",
+              "const status = response.data.status;",
+              "",
+              "console.log('Job Status:', status);",
+              "",
+              "if (status === 'succeeded') {",
+              "    console.log('Job completed successfully!');",
+              "    console.log('Result:', JSON.stringify(response.data.manifest || response.data.result, null, 2));",
+              "} else if (status === 'failed') {",
+              "    console.log('Job failed:', response.data.error);",
+              "} else {",
+              "    console.log('Job still processing... Run this request again in a few seconds.');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{IMGGO_BASE_URL}}/jobs/{{job_id}}",
+          "host": ["{{IMGGO_BASE_URL}}"],
+          "path": ["jobs", "{{job_id}}"]
+        },
+        "description": "Check the status of a processing job.\n\n**Status values:**\n- `pending` - Job is queued\n- `processing` - Job is being processed\n- `succeeded` - Job completed successfully (result in `manifest` or `result` field)\n- `failed` - Job failed (error message in `error` field)\n\n**Usage:**\n- Run this request repeatedly until status is `succeeded` or `failed`\n- Typically takes 2-10 seconds\n- The `job_id` is automatically set from previous upload requests"
+      },
+      "response": []
+    },
+    {
+      "name": "4. Upload with Idempotency Key",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Generate unique idempotency key",
+              "const idempotencyKey = 'request-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);",
+              "pm.collectionVariables.set('idempotency_key', idempotencyKey);",
+              "console.log('Generated Idempotency Key:', idempotencyKey);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Extract job_id from response",
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.data && response.data.job_id) {",
+              "        pm.collectionVariables.set('job_id', response.data.job_id);",
+              "        console.log('Job ID saved:', response.data.job_id);",
+              "    }",
+              "}",
+              "",
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Idempotency-Key",
+            "value": "{{idempotency_key}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{IMGGO_BASE_URL}}/patterns/{{pattern_id}}/ingest",
+          "host": ["{{IMGGO_BASE_URL}}"],
+          "path": ["patterns", "{{pattern_id}}", "ingest"]
+        },
+        "description": "Upload with an idempotency key to prevent duplicate processing.\n\n**What is idempotency?**\nIf you retry a request with the same idempotency key, the API will return the same job_id without creating a duplicate job.\n\n**When to use:**\n- Production deployments\n- Retry logic\n- Network-unstable environments\n\n**Note:**\nThe idempotency key is automatically generated in the Pre-request Script."
+      },
+      "response": []
+    },
+    {
+      "name": "5. List Patterns (if supported)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{IMGGO_BASE_URL}}/patterns",
+          "host": ["{{IMGGO_BASE_URL}}"],
+          "path": ["patterns"]
+        },
+        "description": "List all available patterns (if endpoint is available).\n\n**Note:** This endpoint may not be available in all API versions."
+      },
+      "response": []
+    }
+  ]
+}
